@@ -1,28 +1,27 @@
 package University.Dormitory.domain;
 
 
-import University.Dormitory.domain.Enum.Role;
+import University.Dormitory.domain.Enum.Authority;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.Id;
 
 import java.util.ArrayList;
 import java.util.List;
 
-
+@Entity
 @Getter
-@Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
 public class Authorities {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private long authorityId;
 
-    @Column(name = "role", nullable = false)
+    @Column(name = "Authority", nullable = false)
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private Authority authority;
 
-    @OneToMany
-    private List<User> users = new ArrayList<>();
+    @OneToMany(mappedBy = "authorities", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserAuthorities> users = new ArrayList<>();
 }
