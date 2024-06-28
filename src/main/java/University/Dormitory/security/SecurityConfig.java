@@ -39,20 +39,24 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(configurer ->
-                configurer.requestMatchers("").hasRole("ASSISTANT")//여기에다가 이제 주소 넣으면 됨
-                        .anyRequest().authenticated()
-        )
+                        configurer
+                                .requestMatchers("/ASSISTANT/**").hasRole("ROLE_ASSISTANT")
+                                .requestMatchers("/SCHEDULE_ASSISTANT/**").hasRole("ROLE_SCHEDULE_ASSISTANT")
+                                .requestMatchers("/ROLE_PERFECT/**").hasRole("ROLE_PERFECT")
+                                .anyRequest().authenticated()
+                )
                 .formLogin(form ->
-                form
-                        .loginPage("/showMyLoginPageURL")
-                        .loginProcessingUrl("authenticateTheUser")
-                        .permitAll()
-        )
+                        form
+                                .loginPage("/login")
+                                .loginProcessingUrl("authenticateTheUser")
+                                .failureUrl("/login-error") // 로그인 실패 시 이동할 페이지
+                                .permitAll()
+                )
                 .logout(logout ->
                         logout.permitAll()
                 )
                 .exceptionHandling(configurer ->
-                        configurer.accessDeniedPage("/access-denied_page")
+                        configurer.accessDeniedPage("/access-denied") // 권한 없을 시 접근할 페이지
                 );
         return http.build();
     }
