@@ -1,16 +1,22 @@
 package University.Dormitory.security;
 
-import lombok.Builder;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.sql.DataSource;
-
+@Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+    private final JwtTokenProvider jwtTokenProvider;
     @Bean
     public UserDetailsManager userDetailsManager(DataSource dataSource) {
         JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager(dataSource);
@@ -29,12 +35,12 @@ public class SecurityConfig {
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-//비밀번호 들어왔을 때 설정하는 방법임
-    @Bean
-    public void register(int id, String password) {
-        String encodedPasswrod = passwordEncoder().encode(password);
-
-    }
+////비밀번호 들어왔을 때 설정하는 방법임
+//    @Bean
+//    public void register(int id, String password) {
+//        String encodedPasswrod = passwordEncoder().encode(password);
+//
+//    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -57,7 +63,8 @@ public class SecurityConfig {
                 )
                 .exceptionHandling(configurer ->
                         configurer.accessDeniedPage("/access-denied") // 권한 없을 시 접근할 페이지
-                );
+                )
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }
