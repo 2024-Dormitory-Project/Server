@@ -26,7 +26,6 @@ import java.util.Date;
 public class JwtTokenProvider {
     private final Logger LOGGER = LoggerFactory.getLogger(JwtTokenProvider.class);
     private final UserDetailsService userDetailsService;
-    private final long tokenValidMillsecond = 1000L * 60 * 60;
     @Value("${jwt.secret}")
     private String secretKey = "secretKey";
 
@@ -42,6 +41,7 @@ public class JwtTokenProvider {
         Claims claims = Jwts.claims().setSubject(userId);
         claims.put("Authority", authority);
         Date now = new Date();
+        long tokenValidMillsecond = 1000L * 60 * 60;
         String token = Jwts.builder().setClaims(claims).setIssuedAt(now).setExpiration(new Date(now.getTime() + tokenValidMillsecond))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
