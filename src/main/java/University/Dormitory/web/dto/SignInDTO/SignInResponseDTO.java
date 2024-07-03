@@ -11,8 +11,6 @@ public class SignInResponseDTO {
     @Builder
     public static class SignInDto {
         private String token;
-        private String name;
-        private int userId;
     }
 
     @Builder
