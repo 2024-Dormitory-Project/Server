@@ -1,13 +1,11 @@
 package University.Dormitory.service.UserService;
 
-import University.Dormitory.Converter.UserAuthorityConverter;
 import University.Dormitory.Converter.UserConverter;
 import University.Dormitory.domain.Enum.Authority;
 import University.Dormitory.domain.User;
-import University.Dormitory.domain.UserAuthorities;
 import University.Dormitory.exception.SignInFailException;
+import University.Dormitory.exception.SignInFailedException;
 import University.Dormitory.repository.CustomRepository;
-import University.Dormitory.repository.JPARepository.UserAuthoritiesRepository;
 import University.Dormitory.repository.JPARepository.UserRepository;
 import University.Dormitory.security.JwtTokenProvider;
 import University.Dormitory.web.dto.SignInDTO.SignInRequestDTO;
@@ -19,7 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -28,7 +26,6 @@ import java.util.List;
 public class UserCommandServiceImpl implements UserCommandService {
 
     private final UserRepository userRepository;
-    private final UserAuthoritiesRepository userAuthoritiesRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final CustomRepository customRepository;
     private final JwtTokenProvider jwtTokenProvider;
@@ -45,27 +42,32 @@ public class UserCommandServiceImpl implements UserCommandService {
         User newUser = UserConverter.toUser(user); //유저 생성
         newUser.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         User savedUser = userRepository.save(newUser); // User 엔티티 저장
-        List<UserAuthorities> userAuthoritiesList = UserAuthorityConverter.touserAuthorities(user, savedUser);
-        for (UserAuthorities userAuthorities : userAuthoritiesList) {
-            // 각 UserAuthorities 객체를 데이터베이스에 저장
-            userAuthoritiesRepository.save(userAuthorities);
-        }
         return savedUser;
     }
 
     @Override
     public SignInResponseDTO.SignInDto SignIn(SignInRequestDTO.SignInDto user) {
         int userId = user.getUserId();
+        String userName = "";
+        Optional<User> byId = userRepository.findById((long) userId);
+        if (byId.isPresent()) {
+            userName = byId.get().getName();
+        } else {
+            throw new SignInFailedException("로그인에 실패하였습니다.");
+        }
+
+        log.info("userId:{}", userId);
+        log.info("전달받은 비밀번호:{}, 데이터베이스 비밀번호:{}", user.getPassword(), customRepository.findPasswordByUserId(userId));
         if (!bCryptPasswordEncoder.matches(user.getPassword(), customRepository.findPasswordByUserId(userId))) {
             log.info("[패스워드 틀림]");
             throw new SignInFailException("패스워드가 일치하지 않습니다.");
         }
         log.info("[패스워드 일치. 토큰 발급]");
         Authority authoritiesByUserId = customRepository.findAuthoritiesByUserId(userId);
-        SignInResponseDTO.SignInDto signInResultDto = SignInResponseDTO.SignInDto.builder()
-                .token(jwtTokenProvider.createToken(String.valueOf(userId), authoritiesByUserId))
+        SignInResponseDTO.SignInDto result = SignInResponseDTO.SignInDto.builder()
+                .token(jwtTokenProvider.createToken(String.valueOf(userId), authoritiesByUserId,userName))
                 .build();
-        return signInResultDto;
+        return result;
     }
 
     public String SignOut(int userId) {
