@@ -1,7 +1,9 @@
-package University.Dormitory.domain;
+package generated.University.Dormitory.domain;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
+import University.Dormitory.domain.User;
+import University.Dormitory.domain.WorkDate;
 import com.querydsl.core.types.dsl.*;
 
 import com.querydsl.core.types.PathMetadata;
@@ -20,7 +22,7 @@ public class QUser extends EntityPathBase<User> {
 
     public static final QUser user = new QUser("user");
 
-    public final ListPath<UserAuthorities, QUserAuthorities> authorities = this.<UserAuthorities, QUserAuthorities>createList("authorities", UserAuthorities.class, QUserAuthorities.class, PathInits.DIRECT2);
+    public final EnumPath<University.Dormitory.domain.Enum.Authority> authority = createEnum("authority", University.Dormitory.domain.Enum.Authority.class);
 
     public final EnumPath<University.Dormitory.domain.Enum.Dormitory> dormitory = createEnum("dormitory", University.Dormitory.domain.Enum.Dormitory.class);
 

@@ -1,17 +1,14 @@
 package University.Dormitory.repository;
 
 import University.Dormitory.domain.Enum.Authority;
-import University.Dormitory.domain.UserAuthorities;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import static generated.University.Dormitory.domain.QUser.user;
 
-import static University.Dormitory.domain.QUser.user;
-import static University.Dormitory.domain.QUserAuthorities.userAuthorities;
-
-
+@Slf4j
 @Repository
 public class CustomRepository {
     private final EntityManager em;
@@ -30,17 +27,12 @@ public class CustomRepository {
     }
 
     public Authority findAuthoritiesByUserId(int userId) {
-        List<UserAuthorities> authorities = query.select(userAuthorities)
+        log.info("[findAuthoritiesByUserId] : 권한 정보 찾기 실행. 토큰발행용");
+        Authority authority = query
+                .select(user.authority)
                 .from(user)
                 .where(user.userId.eq(userId))
-                .fetch();
-        if(authorities.contains("PERFECT")) {
-            return Authority.PERFECT;
-        }
-        else if(authorities.contains("SCHEDULE_ASSISTANT")) {
-            return Authority.SCHEDULE_ASSISTANT;
-        }
-        else
-            return Authority.ASSISTANT;
+                .fetchOne();
+        return authority;
     }
 }

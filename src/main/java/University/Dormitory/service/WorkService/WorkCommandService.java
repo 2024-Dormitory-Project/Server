@@ -2,13 +2,13 @@ package University.Dormitory.service.WorkService;
 
 public interface WorkCommandService {
 //    근무 시간 조정(나의 시간 조정)
-
-//    근무 넘기기(교대가 아니라 아예 근무 주는 것)
-
+    void changeMyWorkTime();
+//    근무교체(교대가 아니라 아예 근무 주는 것)
+    void giveMyWork();
 //    근무 맞교대(나의 근무와 다른 사람의 근무 변경)
-    
+    void changeMyWorkWithOther();
 //    근무 지각 등의 사유 작성 가능 기능
-
+    void writeReason();
 //    지각 등의 시간 임의 변경 기능
 
 //    출석인증하기
@@ -22,7 +22,6 @@ public interface WorkCommandService {
 //    끝나는 쉬는시간 넣기 기능
     
 //    우편 근무 날짜 넣기 기능
-
 
 
 }

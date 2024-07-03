@@ -12,23 +12,21 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 @Slf4j
+@RequestMapping("/login")
 public class LoginController {
 
     private final UserCommandService userCommandService;
 
-
     @PostMapping("/SignIn")
     public ApiResponse<SignInResponseDTO.SignInDto> SignIn(@RequestBody @Valid SignInRequestDTO.SignInDto request) {
-        log.info("[PostMapping] [SigIn 실행]");
+        log.info("[PostMapping] [SignIn 실행]");
         log.info("로그인 시도 정보: id : {}, pw : {}", request.getUserId(), request.getPassword());
         SignInResponseDTO.SignInDto signInDto = userCommandService.SignIn(request);
         log.info("로그인 성공. SignInResponseDTO.SignInDTO 객체 반환");
@@ -38,7 +36,7 @@ public class LoginController {
     @GetMapping("/")
     public String home() {
         log.info("[GetMapping] [로그인 페이지로 리다이렉트]");
-        return "redirect:/login";
+        return "redirect:/login/SignIn";
     }
 
     @GetMapping("/SignIn")

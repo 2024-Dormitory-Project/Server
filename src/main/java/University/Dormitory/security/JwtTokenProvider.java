@@ -36,10 +36,12 @@ public class JwtTokenProvider {
         LOGGER.info("[init] JwtTokenProvider 내 secretKey 초기화 완료");
     }
 
-    public String createToken(String userId, Authority authority) {
+    public String createToken(String userId, Authority authority, String userName) {
         LOGGER.info("[CREATE TOKEN] 토큰 생성 시작");
+        LOGGER.info("[추출된 정보] 권한: {}, 이름: {}, 학번:{}, 유효기간은 1시간으로 고정. 해당 정보로 토큰 생성합니다.", authority, userName, userId);
         Claims claims = Jwts.claims().setSubject(userId);
         claims.put("Authority", authority);
+        claims.put("Name", userName);
         Date now = new Date();
         long tokenValidMillsecond = 1000L * 60 * 60;
         String token = Jwts.builder().setClaims(claims).setIssuedAt(now).setExpiration(new Date(now.getTime() + tokenValidMillsecond))

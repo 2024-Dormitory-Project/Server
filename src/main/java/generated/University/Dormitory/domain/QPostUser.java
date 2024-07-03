@@ -1,7 +1,8 @@
-package University.Dormitory.domain;
+package generated.University.Dormitory.domain;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
+import University.Dormitory.domain.PostUser;
 import com.querydsl.core.types.dsl.*;
 
 import com.querydsl.core.types.PathMetadata;
