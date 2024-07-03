@@ -18,8 +18,6 @@ public class WorkDate {
     @JoinColumn(name = "user_id")
     private User user;
 
-    private LocalDateTime breakStartTime;
-    private LocalDateTime breakEndTime;
     private LocalDateTime scheduledStartTime;
     private LocalDateTime scheduledLeaveTime;
     private LocalDateTime actualStartTime;
