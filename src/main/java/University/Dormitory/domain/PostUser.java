@@ -1,22 +1,21 @@
 package University.Dormitory.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
 
+
+// 독자적으로 운영하는 테이블. 원래 근무표 편성 테이블이랑 겹치지 않는다는 뜻
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @Getter
+@Setter
 @AllArgsConstructor
 public class PostUser {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int userId;
 
     private LocalDate postWorkDate;
 }
