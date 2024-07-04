@@ -22,12 +22,7 @@ public class SecurityConfig{
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-////비밀번호 들어왔을 때 설정하는 방법임
-//    @Bean
-//    public void register(int id, String password) {
-//        String encodedPasswrod = passwordEncoder().encode(password);
-//
-//    }
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
