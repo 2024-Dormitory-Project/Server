@@ -10,7 +10,7 @@ import static University.Dormitory.apiPayLoad.code.ErrorCode.WRONG_PASSWROD;
 
 @Slf4j
 @RestControllerAdvice
-public class GlobalExceptuonHandler {
+public class GlobalExceptionHandler {
     @ExceptionHandler(SignInFailException.class)
     public ApiResponse<SignInResponseDTO.SignInFail> handleSignInFailException(SignInFailException e) {
         log.error("로그인 실패: {}", e.getMessage());

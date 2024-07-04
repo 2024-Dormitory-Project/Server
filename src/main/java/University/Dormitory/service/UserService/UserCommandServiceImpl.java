@@ -5,6 +5,7 @@ import University.Dormitory.domain.Enum.Authority;
 import University.Dormitory.domain.User;
 import University.Dormitory.exception.SignInFailException;
 import University.Dormitory.exception.SignInFailedException;
+import University.Dormitory.exception.UserAlreadyExistException;
 import University.Dormitory.repository.CustomRepository;
 import University.Dormitory.repository.JPARepository.UserRepository;
 import University.Dormitory.security.JwtTokenProvider;
@@ -38,7 +39,10 @@ public class UserCommandServiceImpl implements UserCommandService {
 
     @Override
     public User SignUp(SignUpRequestDTO.SignUpDto user) {
-
+        if(checkUserIdDuplicate((long) user.getUserId())) {
+            log.info("[학번 중복 발생]. 예외 처리합니다.");
+            throw new UserAlreadyExistException("유저가 이미 존재합니다");
+        }
         User newUser = UserConverter.toUser(user); //유저 생성
         newUser.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         User savedUser = userRepository.save(newUser); // User 엔티티 저장

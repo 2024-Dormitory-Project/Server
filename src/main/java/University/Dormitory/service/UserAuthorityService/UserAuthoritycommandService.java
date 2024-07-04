@@ -1,13 +1,12 @@
 package University.Dormitory.service.UserAuthorityService;
 
 public interface UserAuthoritycommandService {
-//    스케줄 권한 추가 기능(ROLE_ASSISTANT -> ROLE_SCHEDULE_ASSISTANT 변경 가능)
-    
-//    스케줄 권한 뺏기 기능(ROLE_SCHEDULE_ASSISTANT -> ROLE_ASSISTANT 변경 기능)
+//    권한 추가
+    void addAuthorityByUserId(int userId);
+//    권한 제거
+    void removeAuthorityByUserId(int userId);
 
-//    사감 권한 추가 기능
-
-//    사감 권한 제거 기능
-
+//    현재 권한 정보
+    void findAuthorityByUserId(int userId);
 
 }
