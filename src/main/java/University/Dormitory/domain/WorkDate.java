@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @Builder
 @Getter
 @AllArgsConstructor
+@Setter
 public class WorkDate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
