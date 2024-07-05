@@ -15,6 +15,6 @@ public interface UserCommandService {
     //    로그인 기능
     SignInResponseDTO.SignInDto SignIn(SignInRequestDTO.SignInDto user);
 
-//    회원탈퇴
+    //    회원탈퇴
     String SignOut(int userId);
 }
