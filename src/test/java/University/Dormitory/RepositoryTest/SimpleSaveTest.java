@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 @Slf4j
 @Transactional
-public class CustomRepositoryTest {
+public class SimpleSaveTest {
     @Autowired
     CustomRepository customRepository;
     @Autowired
