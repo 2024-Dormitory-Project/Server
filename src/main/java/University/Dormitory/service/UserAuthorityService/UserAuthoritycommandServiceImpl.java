@@ -19,7 +19,7 @@ public class UserAuthoritycommandServiceImpl implements UserAuthoritycommandServ
 
     private User findUserById(int userId) {
         return userRepository.findById((long) userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+                .orElseThrow();
     }
 
     @Override

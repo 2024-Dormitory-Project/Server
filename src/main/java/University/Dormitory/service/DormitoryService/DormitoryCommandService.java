@@ -1,8 +1,12 @@
 package University.Dormitory.service.DormitoryService;
 
+import University.Dormitory.domain.Enum.Dormitory;
+
+import java.time.LocalDate;
+
 public interface DormitoryCommandService {
 //    N기숙사의 근무자 보기
-//    ApiResponse<> viewDormitoryWorkers(LocalDate date);
+    String viewDormitoryWorkers(LocalDate date, Dormitory dormitory);
 //    우편근무자 보기
-//    ApiResponse<> viewPostWorker(LocalDate date);
+    String viewPostWorker(LocalDate date);
 }

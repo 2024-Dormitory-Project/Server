@@ -23,12 +23,12 @@ public interface WorkCommandService {
      */
     String giveMyWorkByUserIds(int userId1, int userId2, LocalDateTime userId1Date);
 
-    
+
 //        근무 맞교대(나의 근무와 다른 사람의 근무 변경)
 //    나의 근무시간과 근무를 받을 사람의 시간 모두 필요
     /**
      * 근무 맞교환. 신청자와 수락자의 근무 시간을 변경하는 것.
-     * 
+     *
      * @param userId1 신청자의 학번
      * @param userId2 수락자의 학번
      * @param userId1StartTime 신청자의 근무 시작 시간

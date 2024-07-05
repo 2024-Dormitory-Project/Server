@@ -40,9 +40,9 @@ public class SecurityConfig{
                 )
                 .logout(logout ->
                         logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/") // 로그아웃 성공 후 리다이렉트할 URL
-                        .permitAll()
+                                .logoutUrl("/logout")
+                                .logoutSuccessUrl("/") // 로그아웃 성공 후 리다이렉트할 URL
+                                .permitAll()
                 )
                 .exceptionHandling(configurer ->
                         configurer.accessDeniedPage("/access-denied") // 권한 없을 시 접근할 페이지

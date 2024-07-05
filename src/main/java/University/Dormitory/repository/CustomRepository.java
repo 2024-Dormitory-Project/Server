@@ -1,16 +1,19 @@
 package University.Dormitory.repository;
 
 import University.Dormitory.domain.Enum.Authority;
-import University.Dormitory.domain.WorkDate;
+import University.Dormitory.domain.Enum.Dormitory;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static University.Dormitory.domain.QWorkDate.workDate;
@@ -67,5 +70,38 @@ public class CustomRepository {
                 .execute();
     }
 
+    public HashMap<String, WorkTime> findDormitoryWorkersNameByDate(LocalDate date, Dormitory dormitory) {
+        HashMap<String, WorkTime> dormitoryWorkers = new HashMap<>();
 
+        List<Tuple> fetchWorkTimesAndNames = query
+                .select(workDate.user.name, workDate.scheduledStartTime, workDate.scheduledLeaveTime)
+                .from(workDate)
+                .where(Expressions.dateTemplate(LocalDate.class, "DATE_FORMAT({0}, {1})", workDate.scheduledStartTime, "%Y-%m-%d").eq(date)
+                        .and(workDate.user.dormitory.eq(dormitory)))
+                .fetch();
+
+        for (Tuple tuple : fetchWorkTimesAndNames) {
+            String name = tuple.get(workDate.user.name);
+            LocalDateTime scheduledStartTime = tuple.get(workDate.scheduledStartTime);
+            LocalDateTime scheduledLeaveTime = tuple.get(workDate.scheduledLeaveTime);
+
+            WorkTime workTime = new WorkTime(scheduledStartTime, scheduledLeaveTime);
+            log.info("[이름] : {}, 시작시간:{}, 끝나는 시간:{}", name, scheduledStartTime, scheduledLeaveTime);
+            dormitoryWorkers.put(name, workTime);
+        }
+
+        return dormitoryWorkers;
+    }
+
+
+    @Getter
+    public class WorkTime {
+        private LocalDateTime startTime;
+        private LocalDateTime leaveTime;
+
+        WorkTime(LocalDateTime startTime, LocalDateTime leaveTime) {
+            this.startTime = startTime;
+            this.leaveTime = leaveTime;
+        }
+    }
 }
