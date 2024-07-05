@@ -2,6 +2,7 @@ package generated.University.Dormitory.domain;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
+import University.Dormitory.domain.QUser;
 import University.Dormitory.domain.WorkDate;
 import com.querydsl.core.types.dsl.*;
 
