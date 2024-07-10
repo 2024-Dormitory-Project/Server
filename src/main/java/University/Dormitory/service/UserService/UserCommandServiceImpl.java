@@ -30,7 +30,26 @@ public class UserCommandServiceImpl implements UserCommandService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final CustomRepository customRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    
+//    인터페이스에는 없지만, 쓰이는 함수
+    private User findUserById(int userId) {
+        return userRepository.findById((long) userId)
+                .orElseThrow();
+    }
 
+
+//    해당 함수 사용 시, authority는 converter 이용해서 넘겨줄 것.
+    @Override
+    public void updateAuthorityByUserId(int userId, Authority authority) {
+        User user = findUserById(userId);
+        user.setAuthority(authority);
+        userRepository.save(user);
+    }
+
+    @Override
+    public void findAuthorityByUserId(int userId) {
+        User user = findUserById(userId);
+    }
 
     @Override
     public boolean checkUserIdDuplicate(Long userId) {

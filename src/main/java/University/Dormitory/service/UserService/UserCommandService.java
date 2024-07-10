@@ -1,11 +1,19 @@
 package University.Dormitory.service.UserService;
 
+import University.Dormitory.domain.Enum.Authority;
 import University.Dormitory.domain.User;
 import University.Dormitory.web.dto.SignInDTO.SignInRequestDTO;
 import University.Dormitory.web.dto.SignInDTO.SignInResponseDTO;
 import University.Dormitory.web.dto.SignUpDTO.SignUpRequestDTO;
 
 public interface UserCommandService {
+
+    void updateAuthorityByUserId(int userId, Authority authority);
+
+    //    현재 권한 정보
+    void findAuthorityByUserId(int userId);
+
+    
     //    학번 중복 여부 확인
     boolean checkUserIdDuplicate(Long userId);
 
