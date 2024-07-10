@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.HashMap;
+import java.util.Map;
 
 
 @Service
@@ -23,13 +23,19 @@ public class DormitoryCommandServiceImpl implements DormitoryCommandService {
     private final CustomRepository customRepository;
 
     @Override
-    public String viewDormitoryWorkers(LocalDate date, Dormitory dormitory) {
-        HashMap<String, CustomRepository.WorkTime> userNameDormitoryWorkersByDate = customRepository.findDormitoryWorkersNameByDate(date, dormitory);
-        return "DTO 만들어서 return";
+    public Map<String, CustomRepository.WorkTime> viewDormitoryWorkers(LocalDate date, Dormitory dormitory) {
+        try {
+            return customRepository.findDormitoryWorkersNameByDate(date, dormitory);
+        }
+        catch(Exception e) {
+            throw new RuntimeException("기숙사 근무자를 보는 중 오류가 발생했습니다. 관리자에게 문의하세요. : " + e.getMessage());
+        }
+
     }
 
     @Override
     public String viewPostWorker(LocalDate date) {
         return null;
+
     }
 }
