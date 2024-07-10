@@ -15,4 +15,5 @@ public interface WorkDateRepository extends JpaRepository<WorkDate, Long> {
 
     @Query("SELECT w FROM WorkDate w WHERE w.user.userId = :userId AND w.actualStartTime = :actualStartTime")
     Optional<WorkDate> findByUserIdAndActualStartTime(@Param("userId") Long userId, @Param("actualStartTime") LocalDateTime actualStartTime);
+
 }

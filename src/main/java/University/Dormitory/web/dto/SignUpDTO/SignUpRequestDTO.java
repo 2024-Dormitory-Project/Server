@@ -1,6 +1,7 @@
 package University.Dormitory.web.dto.SignUpDTO;
 
 
+import University.Dormitory.domain.Enum.Authority;
 import University.Dormitory.domain.Enum.Dormitory;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
