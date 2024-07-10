@@ -2,6 +2,7 @@ package University.Dormitory.repository;
 
 import University.Dormitory.domain.Enum.Authority;
 import University.Dormitory.domain.Enum.Dormitory;
+import University.Dormitory.domain.WorkDate;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -10,15 +11,16 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+import static University.Dormitory.domain.QUser.user;
 import static University.Dormitory.domain.QWorkDate.workDate;
-import static generated.University.Dormitory.domain.QUser.user;
-
 @Slf4j
 @Repository
 public class CustomRepository {
@@ -47,6 +49,7 @@ public class CustomRepository {
         return authority;
     }
 
+    //    안쓰는 것. 아마 특정일에 일하는 모든 근무자들 날짜에 의해서만 가져오는 쿼리문인듯
     public List<Integer> findUserIdsByDate(LocalDate date) {
         List<Integer> userIdList = new ArrayList<>();
 
@@ -64,14 +67,14 @@ public class CustomRepository {
     }
 
     public long writeReason(int userID, String reason, LocalDateTime date) {
-        return  query.update(workDate)
+        return query.update(workDate)
                 .set(workDate.Reason, reason)
                 .where(workDate.user.userId.eq(userID).and(workDate.scheduledStartTime.eq(date)))
                 .execute();
     }
 
-    public HashMap<String, WorkTime> findDormitoryWorkersNameByDate(LocalDate date, Dormitory dormitory) {
-        HashMap<String, WorkTime> dormitoryWorkers = new HashMap<>();
+    public Map<String, WorkTime> findDormitoryWorkersNameByDate(LocalDate date, Dormitory dormitory) {
+        Map<String, WorkTime> dormitoryWorkers = new ConcurrentHashMap<>();
 
         List<Tuple> fetchWorkTimesAndNames = query
                 .select(workDate.user.name, workDate.scheduledStartTime, workDate.scheduledLeaveTime)
@@ -93,6 +96,44 @@ public class CustomRepository {
         return dormitoryWorkers;
     }
 
+    public int countWorkDays(int userId, int year, int month) {
+        String monthString = String.format("%04d-%02d", year, month);
+
+        List<WorkDate> list = query.selectFrom(workDate)
+                .where(workDate.user.userId.eq(userId)
+                        .and(Expressions.dateTemplate(String.class, "DATE_FORMAT({0}, {1})", workDate.scheduledStartTime, "%Y-%m").eq(monthString)))
+                .fetch();
+        return list.size();
+    }
+
+    public int countWorkHours(int userId, int year, int month) {
+        String monthString = String.format("%04d-%02d", year, month);
+
+        List<WorkDate> list = query.selectFrom(workDate)
+                .where(workDate.user.userId.eq(userId)
+                        .and(Expressions.dateTemplate(String.class, "DATE_FORMAT({0}, '%Y-%m')", workDate.scheduledStartTime).eq(monthString)))
+                .fetch();
+
+        long workedHour = 0;
+        for (WorkDate date : list) {
+            Duration duration = Duration.between(date.getScheduledStartTime(), date.getScheduledLeaveTime());
+            workedHour += duration.toHours();
+        }
+
+        return (int) workedHour;
+    }
+
+    public List<Tuple> findScheduleTimeByUsreId(int userId) {
+        return query.select(workDate.scheduledStartTime, workDate.scheduledLeaveTime)
+                .from(workDate)
+                .where(workDate.user.userId.eq(userId))
+                .fetch();
+    }
+
+//    public String findPostUserNameByDate(LocalDate date) {
+//        return query.selectFrom(postUser.name)
+//                .where(postUser.postWorkDate.eq(date))
+//    }
 
     @Getter
     public class WorkTime {
