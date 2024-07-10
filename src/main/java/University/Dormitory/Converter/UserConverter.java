@@ -12,7 +12,7 @@ import java.time.LocalDate;
 public class UserConverter {
     public static User toUser(SignUpRequestDTO.SignUpDto request) {
         Authority authority;
-        String authorityString = request.getAuthority();
+        String authorityString = String.valueOf(request.getAuthority());
         switch (authorityString) {
             case "사감":
                 authority = Authority.PERFECT;
