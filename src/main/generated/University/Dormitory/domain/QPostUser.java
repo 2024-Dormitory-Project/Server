@@ -19,6 +19,8 @@ public class QPostUser extends EntityPathBase<PostUser> {
 
     public static final QPostUser postUser = new QPostUser("postUser");
 
+    public final StringPath name = createString("name");
+
     public final DatePath<java.time.LocalDate> postWorkDate = createDate("postWorkDate", java.time.LocalDate.class);
 
     public final NumberPath<Integer> userId = createNumber("userId", Integer.class);

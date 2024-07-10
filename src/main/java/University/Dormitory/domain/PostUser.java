@@ -17,5 +17,7 @@ public class PostUser {
     @Id
     private int userId;
 
+    private String name;
+
     private LocalDate postWorkDate;
 }
