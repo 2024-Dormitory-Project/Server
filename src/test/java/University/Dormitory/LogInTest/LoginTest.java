@@ -39,7 +39,6 @@ public class LoginTest {
     }
 
 
-
     @Test
     @DisplayName("로그인 결과 반환 테스트")
     void loginTokenTest() {
