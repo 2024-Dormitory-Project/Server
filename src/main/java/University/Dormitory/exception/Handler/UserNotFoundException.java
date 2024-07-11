@@ -1,4 +1,4 @@
-package University.Dormitory.exception;
+package University.Dormitory.exception.Handler;
 
 public class UserNotFoundException extends RuntimeException{
     public UserNotFoundException(String Message) {
