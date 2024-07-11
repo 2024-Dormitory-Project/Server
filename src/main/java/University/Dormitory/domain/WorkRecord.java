@@ -8,7 +8,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class UserAlarm {
+public class WorkRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
