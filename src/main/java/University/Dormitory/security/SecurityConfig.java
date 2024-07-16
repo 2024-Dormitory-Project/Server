@@ -31,9 +31,9 @@ public class SecurityConfig{
                                 .requestMatchers(HttpMethod.GET, "/swagger-resources/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/webjars/**").permitAll()
                                 .requestMatchers("/login/**").permitAll()
-                                .requestMatchers("/ASSISTANT/**").hasAnyRole("ASSISTANT", "SCHEDULE_ASSISTANT", "PERFECT")
-                                .requestMatchers("/SCHEDULE_ASSISTANT/**").hasAnyRole("SCHEDULE_ASSISTANT", "PERFECT")
-                                .requestMatchers("/PERFECT/**").hasRole("PERFECT")
+                                .requestMatchers("/assistant/**").hasAnyRole("ASSISTANT", "SCHEDULE_ASSISTANT", "PERFECT")
+                                .requestMatchers("/schedule/**").hasAnyRole("SCHEDULE_ASSISTANT", "PERFECT")
+                                .requestMatchers("/perfect/**").hasRole("PERFECT")
                                 .anyRequest().permitAll()
                 )
                 .logout(logout ->
