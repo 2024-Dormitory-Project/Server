@@ -74,7 +74,7 @@ public class CustomRepository {
                 .execute();
     }
 
-    public Map<String, WorkTime> findDormitoryWorkersNameByDateAndDate(LocalDate date, Dormitory dormitory) {
+    public Map<String, WorkTime> findDormitoryWorkersNameByDateAndDormitory(LocalDate date, Dormitory dormitory) {
         Map<String, WorkTime> dormitoryWorkers = new ConcurrentHashMap<>();
 
         List<Tuple> fetchWorkTimesAndNames = query
