@@ -29,6 +29,7 @@ public class DateTest {
     WorkDate userWorkDate3;
     User user1;
     User user2;
+    User user3;
     @Autowired
     private WorkDateRepository workDateRepository;
     @Autowired
@@ -42,22 +43,31 @@ public class DateTest {
     void beforeach() {
 //        유저1 가입
         SignUpRequestDTO.SignUpDto SignUpDto = new SignUpRequestDTO.SignUpDto();
-        SignUpDto.setPassword("123");
-        SignUpDto.setDormitory(Dormitory.BUILDING2);
+        SignUpDto.setPassword("권하림");
+        SignUpDto.setDormitory(Dormitory.DORMITORY2);
         SignUpDto.setUserId(202035505);
         SignUpDto.setAuthority("사감");
         SignUpDto.setName("권하림");
-        log.info("DTO 정보: [pw:1234, 권한:사감, 권하림, BUILDING2] 입력 완료");
+        log.info("DTO 정보: [pw:권하림, 권한:사감, 권하림, BUILDING2] 입력 완료");
         user1 = userCommandService.SignUp(SignUpDto);
 //        유저2 가입
         SignUpRequestDTO.SignUpDto SignUpDto2 = new SignUpRequestDTO.SignUpDto();
-        SignUpDto2.setPassword("1234");
-        SignUpDto2.setDormitory(Dormitory.BUILDING2);
+        SignUpDto2.setPassword("림하권");
+        SignUpDto2.setDormitory(Dormitory.DORMITORY2);
         SignUpDto2.setUserId(202035506);
         SignUpDto2.setAuthority("조교");
         SignUpDto2.setName("림하권");
-        log.info("DTO 정보: [pw:1234, 권한:조교, 림하권, BUILDING2] 입력 완료");
+        log.info("DTO 정보: [pw:림하권, 권한:조교, 림하권, BUILDING2] 입력 완료");
         user2 = userCommandService.SignUp(SignUpDto2);
+//        유저3 가입
+        SignUpRequestDTO.SignUpDto SignUpDto3 = new SignUpRequestDTO.SignUpDto();
+        SignUpDto3.setPassword("오채연");
+        SignUpDto3.setDormitory(Dormitory.DORMITORY3);
+        SignUpDto3.setUserId(202035507);
+        SignUpDto3.setAuthority("조교");
+        SignUpDto3.setName("오채연");
+        log.info("DTO 정보: [pw:오채연, 권한:스케줄조교, 오채연, BUILDING3] 입력 완료");
+        user3 = userCommandService.SignUp(SignUpDto3);
 
 //        유저1의 스케줄상 근무시간, 실제 일한시간 입력
         userWorkDate1 = WorkDate.builder()
@@ -73,6 +83,14 @@ public class DateTest {
                 .user(user2)
                 .actualStartTime(LocalDateTime.now().plusDays(0)) //실제 출근시간 => 현재시간
                 .actualLeaveTime(LocalDateTime.now().plusDays(0).plusHours(1))//실제 퇴근시간 => 현재시간+1시간 
+                .scheduledStartTime(LocalDateTime.now().plusDays(0).plusHours(2))//스케줄 출근시간 => 현재시간+2시간
+                .scheduledLeaveTime(LocalDateTime.now().plusDays(0).plusHours(3))//스케줄 퇴근시간 => 현재시간 + 3시간
+                .build();
+        //        유저3의 스케줄상 근무시간, 실제 일한시간 입력
+        userWorkDate2 = WorkDate.builder()
+                .user(user3)
+                .actualStartTime(LocalDateTime.now().plusDays(0)) //실제 출근시간 => 현재시간
+                .actualLeaveTime(LocalDateTime.now().plusDays(0).plusHours(1))//실제 퇴근시간 => 현재시간+1시간
                 .scheduledStartTime(LocalDateTime.now().plusDays(0).plusHours(2))//스케줄 출근시간 => 현재시간+2시간
                 .scheduledLeaveTime(LocalDateTime.now().plusDays(0).plusHours(3))//스케줄 퇴근시간 => 현재시간 + 3시간
                 .build();
@@ -94,7 +112,7 @@ public class DateTest {
     @DisplayName("권하림의 오늘 스케줄 보기.")
     public void saveWorkDate() {
         workDateRepository.save(userWorkDate1);
-        Map<String, CustomRepository.WorkTime> userNameDormitoryWorkersByDate = customRepository.findDormitoryWorkersNameByDate(LocalDate.now(), Dormitory.BUILDING2);
+        Map<String, CustomRepository.WorkTime> userNameDormitoryWorkersByDate = customRepository.findDormitoryWorkersNameByDateAndDate(LocalDate.now(), Dormitory.DORMITORY2);
         CustomRepository.WorkTime userWorkTime = userNameDormitoryWorkersByDate.get("권하림");
 
         log.info("{}의 일하는 날짜 스케줄상 근무시작(현시간+2시간):{}," +
@@ -107,10 +125,10 @@ public class DateTest {
     }
 
     @Test
-    @DisplayName("오늘 2긱의 근무자 스케줄 보기")
+    @DisplayName("오늘 N긱의 근무자 스케줄 보기")
     public void seeTodayWorkers() {
-        Map<String, CustomRepository.WorkTime> dormitoryWorkersNameByDate = customRepository.findDormitoryWorkersNameByDate(LocalDate.now(), Dormitory.BUILDING2);
-        log.info("오늘 2긱 근무자는");
+        Map<String, CustomRepository.WorkTime> dormitoryWorkersNameByDate = customRepository.findDormitoryWorkersNameByDateAndDate(LocalDate.now(), Dormitory.DORMITORY3);
+        log.info("오늘 N긱 근무자는");
         for (String s : dormitoryWorkersNameByDate.keySet()) {
             log.info("{} 이고 시간은 {}부터 {}까지", s, dormitoryWorkersNameByDate.get(s).getStartTime(), dormitoryWorkersNameByDate.get(s).getLeaveTime());
         }
