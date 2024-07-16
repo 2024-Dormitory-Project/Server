@@ -25,7 +25,7 @@ public class DormitoryCommandServiceImpl implements DormitoryCommandService {
     @Override
     public Map<String, CustomRepository.WorkTime> viewDormitoryWorkers(LocalDate date, Dormitory dormitory) {
         try {
-            return customRepository.findDormitoryWorkersNameByDate(date, dormitory);
+            return customRepository.findDormitoryWorkersNameByDateAndDormitory(date, dormitory);
         }
         catch(Exception e) {
             throw new RuntimeException("기숙사 근무자를 보는 중 오류가 발생했습니다. 관리자에게 문의하세요. : " + e.getMessage());
