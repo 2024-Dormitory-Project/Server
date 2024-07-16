@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static University.Dormitory.domain.QUser.user;
 import static University.Dormitory.domain.QWorkDate.workDate;
+
 @Slf4j
 @Repository
 public class CustomRepository {
@@ -73,7 +74,7 @@ public class CustomRepository {
                 .execute();
     }
 
-    public Map<String, WorkTime> findDormitoryWorkersNameByDate(LocalDate date, Dormitory dormitory) {
+    public Map<String, WorkTime> findDormitoryWorkersNameByDateAndDate(LocalDate date, Dormitory dormitory) {
         Map<String, WorkTime> dormitoryWorkers = new ConcurrentHashMap<>();
 
         List<Tuple> fetchWorkTimesAndNames = query
@@ -106,6 +107,19 @@ public class CustomRepository {
         return list.size();
     }
 
+    public List<Tuple> findWorksByUserIdAndDate(int userId, int year, int month) {
+        String monthString = String.format("%04d-%02d", year, month);
+
+        //        for (Tuple tuple : fetch) {
+//            LocalDateTime localDateTime = tuple.get(workDate.scheduledStartTime);
+//        }
+        return query.select(workDate.scheduledStartTime, workDate.scheduledLeaveTime)
+                .from(workDate)
+                .where(workDate.user.userId.eq(userId)
+                        .and(Expressions.dateTemplate(String.class, "DATE_FORMAT({0}, {1})", workDate.scheduledStartTime, "%Y-%m").eq(monthString)))
+                .fetch();
+    }
+
     public int countWorkHours(int userId, int year, int month) {
         String monthString = String.format("%04d-%02d", year, month);
 
@@ -134,6 +148,14 @@ public class CustomRepository {
 //        return query.selectFrom(postUser.name)
 //                .where(postUser.postWorkDate.eq(date))
 //    }
+
+
+    public Dormitory findDormitoryByUserId(int userId) {
+        return query.select(user.dormitory)
+                .from(user)
+                .where(user.userId.eq((userId)))
+                .fetchOne();
+    }
 
     @Getter
     public class WorkTime {
