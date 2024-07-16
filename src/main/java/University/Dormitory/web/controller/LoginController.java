@@ -23,7 +23,7 @@ public class LoginController {
 
     private final UserCommandService userCommandService;
 
-    @PostMapping("/SignIn")
+    @PostMapping("/signin")
     public ApiResponse<SignInResponseDTO.SignInDto> SignIn(@RequestBody @Valid SignInRequestDTO.SignInDto request) {
         log.info("[PostMapping] [SignIn 실행]");
         log.info("로그인 시도 정보: id : {}, pw : {}", request.getUserId(), request.getPassword());
@@ -35,18 +35,18 @@ public class LoginController {
     @GetMapping("/")
     public String home() {
         log.info("[GetMapping] [로그인 페이지로 리다이렉트]");
-        return "redirect:/login/SignIn";
+        return "redirect:/login/signin";
     }
 
-    @GetMapping("/SignIn")
+    @GetMapping("/signin")
     public String SignIn() {
         return "login";
     }
 
-    @PostMapping("/SignUp")
+    @PostMapping("/signup")
     public ApiResponse<SignUpResponseDTO.SignUpDto> SignUp(@RequestBody @Valid SignUpRequestDTO.SignUpDto request) {
         log.info("[PostMapping] [SignUp 실행]");
-        log.info("회원가입 시도, 권한정보:{}, 기숙사:{}, 이름:{}, 학번:{}, 비밀번호:{}", request.getAuthority(), request.getDormitory(), request.getName(),
+        log.info("회원가입 시도, 권한정보:{}, 기숙사:{}, 이름:{}, 학번:{}, 비밀번호=이름:{}", request.getAuthority(), request.getDormitory(), request.getName(),
                 request.getUserId(), request.getPassword());
         User user = userCommandService.SignUp(request);
         SignUpResponseDTO.SignUpDto result = SignUpResponseDTO.SignUpDto.builder()
@@ -57,7 +57,7 @@ public class LoginController {
         return ApiResponse.onSuccess(result);
     }
 
-    @PostMapping("/SignOut")
+    @PostMapping("/signout")
     public ApiResponse<String> SignOut(@RequestBody @Valid SignOutRequestDTO.SignOutDTO request) {
         log.info("[회원탈퇴 시도], 탈퇴하려는 학번:{}, 탈퇴하려는 이름:{}", request.getUserId(), request.getName());
         userCommandService.SignOut(request.getUserId());
