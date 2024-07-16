@@ -20,14 +20,14 @@ import java.util.List;
 @AllArgsConstructor
 public class User implements UserDetails {
     @Id
-    private int userId;
+    private int userId; // ID의 역할. 학번
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Dormitory dormitory;
 
     @Column(nullable = false)
-    private String password;
+    private String password; //여기 이름이 들어갈 예정
 
     @Column(nullable = false)
     private LocalDate joinDate;
@@ -41,6 +41,9 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = false)
 //    User가 삭제되더라도 해당 User의 근무 기록은 남아있어야 함. orphanRemoval = False로 설정
     private List<WorkDate> workDates = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = false)
+    private List<PostUser> postUsers = new ArrayList<>();
 
     public void setPassword(String password) {
         this.password = password;
