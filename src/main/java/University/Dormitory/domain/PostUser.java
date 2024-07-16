@@ -6,7 +6,6 @@ import lombok.*;
 import java.time.LocalDate;
 
 
-// 독자적으로 운영하는 테이블. 원래 근무표 편성 테이블이랑 겹치지 않는다는 뜻
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
@@ -15,9 +14,12 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class PostUser {
     @Id
-    private int userId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
-    private String name;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     private LocalDate postWorkDate;
 }
