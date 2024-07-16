@@ -2,10 +2,11 @@ package University.Dormitory.service.UserService;
 
 import University.Dormitory.Converter.UserConverter;
 import University.Dormitory.domain.Enum.Authority;
+import University.Dormitory.domain.Enum.Dormitory;
 import University.Dormitory.domain.User;
-import University.Dormitory.exception.SignInFailException;
-import University.Dormitory.exception.SignInFailedException;
-import University.Dormitory.exception.UserAlreadyExistException;
+import University.Dormitory.exception.Handler.PasswordNotMatchException;
+import University.Dormitory.exception.Handler.UserAlreadyExistException;
+import University.Dormitory.exception.Handler.UserNotFoundException;
 import University.Dormitory.repository.CustomRepository;
 import University.Dormitory.repository.JPARepository.UserRepository;
 import University.Dormitory.security.JwtTokenProvider;
@@ -59,7 +60,7 @@ public class UserCommandServiceImpl implements UserCommandService {
     @Override
     public User SignUp(SignUpRequestDTO.SignUpDto user) {
         if(checkUserIdDuplicate((long) user.getUserId())) {
-            log.info("[학번 중복 발생]. 예외 처리합니다.");
+            log.info("[학번 중복 발생]. UserAlreadyExistException 예외 처리합니다.");
             throw new UserAlreadyExistException("유저가 이미 존재합니다");
         }
         User newUser = UserConverter.toUser(user); //유저 생성
@@ -76,21 +77,22 @@ public class UserCommandServiceImpl implements UserCommandService {
         if (byId.isPresent()) {
             userName = byId.get().getName();
         } else {
-            throw new SignInFailedException("로그인에 실패하였습니다.");
+            log.info("로그인에 실패했습니다. ");
+            throw new UserNotFoundException("해당 학번 조교가 존재하지 않습니다..");
         }
 
         log.info("userId:{}", userId);
         log.info("전달받은 비밀번호:{}, 데이터베이스 비밀번호:{}", user.getPassword(), customRepository.findPasswordByUserId(userId));
         if (!bCryptPasswordEncoder.matches(user.getPassword(), customRepository.findPasswordByUserId(userId))) {
-            log.info("[패스워드 틀림]");
-            throw new SignInFailException("패스워드가 일치하지 않습니다.");
+            log.info("[패스워드 틀림] PasswordNotMatchException 예외처리합니다.");
+            throw new PasswordNotMatchException("패스워드가 일치하지 않습니다.");
         }
         log.info("[패스워드 일치. 토큰 발급]");
         Authority authoritiesByUserId = customRepository.findAuthoritiesByUserId(userId);
-        SignInResponseDTO.SignInDto result = SignInResponseDTO.SignInDto.builder()
-                .token(jwtTokenProvider.createToken(String.valueOf(userId), authoritiesByUserId,userName))
+        Dormitory dormitory = customRepository.findDormitoryByUserId(userId);
+        return SignInResponseDTO.SignInDto.builder()
+                .token(jwtTokenProvider.createToken(String.valueOf(userId), authoritiesByUserId,userName,dormitory))
                 .build();
-        return result;
     }
 
     public String SignOut(int userId) {
