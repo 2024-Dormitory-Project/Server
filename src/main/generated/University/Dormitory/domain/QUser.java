@@ -30,6 +30,8 @@ public class QUser extends EntityPathBase<User> {
 
     public final StringPath password = createString("password");
 
+    public final ListPath<PostUser, QPostUser> postUsers = this.<PostUser, QPostUser>createList("postUsers", PostUser.class, QPostUser.class, PathInits.DIRECT2);
+
     public final NumberPath<Integer> userId = createNumber("userId", Integer.class);
 
     public final ListPath<WorkDate, QWorkDate> workDates = this.<WorkDate, QWorkDate>createList("workDates", WorkDate.class, QWorkDate.class, PathInits.DIRECT2);
