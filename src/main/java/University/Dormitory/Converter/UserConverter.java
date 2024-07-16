@@ -2,10 +2,8 @@ package University.Dormitory.Converter;
 
 import University.Dormitory.domain.Enum.Authority;
 import University.Dormitory.domain.User;
-import University.Dormitory.exception.UndefinedAuthorityException;
+import University.Dormitory.exception.Handler.UndefinedAuthorityException;
 import University.Dormitory.web.dto.SignUpDTO.SignUpRequestDTO;
-
-import java.time.LocalDate;
 
 import java.time.LocalDate;
 
