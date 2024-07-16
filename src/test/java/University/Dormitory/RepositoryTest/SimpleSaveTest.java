@@ -28,8 +28,8 @@ public class SimpleSaveTest {
     @BeforeEach
     void beforeach() {
         SignUpRequestDTO.SignUpDto SignUpDto = new SignUpRequestDTO.SignUpDto();
-        SignUpDto.setPassword("123");
-        SignUpDto.setDormitory(Dormitory.BUILDING2);
+        SignUpDto.setPassword("권하림");
+        SignUpDto.setDormitory(Dormitory.DORMITORY2);
         SignUpDto.setUserId(202035505);
         SignUpDto.setAuthority("사감");
         SignUpDto.setName("권하림");

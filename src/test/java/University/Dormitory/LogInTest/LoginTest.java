@@ -24,8 +24,8 @@ public class LoginTest {
     SignInRequestDTO.SignInDto signInDto = new SignInRequestDTO.SignInDto();
     @BeforeEach
     void beforeEachSignUp() {
-        signUpDto.setPassword("123");
-        signUpDto.setDormitory(Dormitory.BUILDING2);
+        signUpDto.setPassword("권하림");
+        signUpDto.setDormitory(Dormitory.DORMITORY2);
         signUpDto.setUserId(202035505);
         signUpDto.setAuthority("사감");
         signUpDto.setName("권하림");
@@ -34,7 +34,7 @@ public class LoginTest {
 
     @BeforeEach
     void beforeEachSignIn() {
-        signInDto.setPassword("123");
+        signInDto.setPassword("권하림");
         signInDto.setUserId(202035505);
     }
 
