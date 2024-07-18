@@ -24,12 +24,15 @@ public class LoginController {
     private final UserCommandService userCommandService;
 
     @PostMapping("/signin")
-    public ApiResponse<SignInResponseDTO.SignInDto> SignIn(@RequestBody @Valid SignInRequestDTO.SignInDto request) {
+    public SignInResponseDTO.SignInDto SignIn(@RequestBody @Valid SignInRequestDTO.SignInDto request) {
         log.info("[PostMapping] [SignIn 실행]");
         log.info("로그인 시도 정보: id : {}, pw : {}", request.getUserId(), request.getPassword());
         SignInResponseDTO.SignInDto signInDto = userCommandService.SignIn(request);
         log.info("로그인 성공. SignInResponseDTO.SignInDTO 객체 반환");
-        return ApiResponse.onSuccess(signInDto);
+
+//       헤더에다가는 accessToken, Body에다가는 refreshToken 발급
+//        .setHeader()사용
+
     }
 
     @GetMapping("/")
@@ -44,7 +47,7 @@ public class LoginController {
     }
 
     @PostMapping("/signup")
-    public ApiResponse<SignUpResponseDTO.SignUpDto> SignUp(@RequestBody @Valid SignUpRequestDTO.SignUpDto request) {
+    public SignUpResponseDTO.SignUpDto SignUp(@RequestBody @Valid SignUpRequestDTO.SignUpDto request) {
         log.info("[PostMapping] [SignUp 실행]");
         log.info("회원가입 시도, 권한정보:{}, 기숙사:{}, 이름:{}, 학번:{}, 비밀번호=이름:{}", request.getAuthority(), request.getDormitory(), request.getName(),
                 request.getUserId(), request.getPassword());
@@ -58,7 +61,7 @@ public class LoginController {
     }
 
     @PostMapping("/signout")
-    public ApiResponse<String> SignOut(@RequestBody @Valid SignOutRequestDTO.SignOutDTO request) {
+    public String SignOut(@RequestBody @Valid SignOutRequestDTO.SignOutDTO request) {
         log.info("[회원탈퇴 시도], 탈퇴하려는 학번:{}, 탈퇴하려는 이름:{}", request.getUserId(), request.getName());
         userCommandService.SignOut(request.getUserId());
         return ApiResponse.onSuccess("오늘도 하나의 조교가 나갔습니다...");

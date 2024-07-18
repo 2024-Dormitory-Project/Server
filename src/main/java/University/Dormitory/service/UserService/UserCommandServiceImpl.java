@@ -91,7 +91,7 @@ public class UserCommandServiceImpl implements UserCommandService {
         Authority authoritiesByUserId = customRepository.findAuthoritiesByUserId(userId);
         Dormitory dormitory = customRepository.findDormitoryByUserId(userId);
         return SignInResponseDTO.SignInDto.builder()
-                .token(jwtTokenProvider.createToken(String.valueOf(userId), authoritiesByUserId,userName,dormitory))
+                .token(jwtTokenProvider.createAccessToken(String.valueOf(userId), authoritiesByUserId,userName,dormitory))
                 .build();
     }
 

@@ -37,19 +37,32 @@ public class JwtTokenProvider {
         LOGGER.info("[init] JwtTokenProvider 내 secretKey 초기화 완료");
     }
 
-    public String createToken(String userId, Authority authority, String userName, Dormitory dormitory) {
-        LOGGER.info("[CREATE TOKEN] 토큰 생성 시작");
+    public String createAccessToken(String userId, Authority authority, String userName, Dormitory dormitory) {
+        LOGGER.info("[CREATE ACCESS TOKEN] 토큰 생성 시작");
         LOGGER.info("[추출된 정보] 권한: {}, 이름: {}, 학번:{},기숙사: {}, 유효기간은 1시간으로 고정. 해당 정보로 토큰 생성합니다.", authority, userName, userId, dormitory);
         Claims claims = Jwts.claims().setSubject(userId);
         claims.put("Authority", authority);
         claims.put("dormitory", dormitory);
         claims.put("Name", userName);
         Date now = new Date();
-        long tokenValidMillsecond = 1000L * 60 * 60;
+        long tokenValidMillsecond = 1000L * 60 * 60; //1시간
         String token = Jwts.builder().setClaims(claims).setIssuedAt(now).setExpiration(new Date(now.getTime() + tokenValidMillsecond))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
-        LOGGER.info("[CreateToken] 토큰 생성 완료");
+        LOGGER.info("[createAccessToken] 토큰 생성 완료");
+        return token;
+    }
+
+    public String createRefreshToken(String userId) {
+        LOGGER.info("[CREATE REFRESH TOKEN] 토큰 생성 시작");
+        LOGGER.info("UserId를 가지고 있는 REFRESH 토큰입니다.");
+        Claims claims = Jwts.claims().setSubject(userId);
+        Date now = new Date();
+        long tokenValidMillsecond = 1000L * 60 * 60 * 24 * 30; //한달
+        String token = Jwts.builder().setClaims(claims).setIssuedAt(now).setExpiration(new Date(now.getTime() + tokenValidMillsecond))
+                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .compact();
+        LOGGER.info("[createAccessToken] 토큰 생성 완료");
         return token;
     }
 
