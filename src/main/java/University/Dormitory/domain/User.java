@@ -20,7 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 public class User implements UserDetails {
     @Id
-    private int userId; // ID의 역할. 학번
+    private long userId; // ID의 역할. 학번
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -57,7 +57,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return Integer.toString(this.userId);
+        return Integer.toString((int) this.userId);
     }
 
     @Override
