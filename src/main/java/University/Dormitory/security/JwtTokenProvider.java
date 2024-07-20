@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -58,7 +59,7 @@ public class JwtTokenProvider {
         LOGGER.info("UserId를 가지고 있는 REFRESH 토큰입니다.");
         Claims claims = Jwts.claims().setSubject(userId);
         Date now = new Date();
-        long tokenValidMillsecond = 1000L * 60 * 60 * 24 * 30; //한달
+        long tokenValidMillsecond = 1000L * 60 * 60 * 24 * 90; //세달
         String token = Jwts.builder().setClaims(claims).setIssuedAt(now).setExpiration(new Date(now.getTime() + tokenValidMillsecond))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
@@ -81,11 +82,21 @@ public class JwtTokenProvider {
         return info;
     }
 
+    public String getUserName(String token) {
+        Claims body = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+        return (String) body.get("name");
+    }
+
 
     public String resolveToken(HttpServletRequest request) {
-        LOGGER.info("[resolveToken] 헤더에서 Token 값 추출");
-        return request.getHeader("X-AUTH-TOKEN");
+        String bearerToken = request.getHeader("Authorization");
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+
+        return null;
     }
+
 
     public boolean validateToken(String token) {
         LOGGER.info("[validateToken] 토큰 유효 시작");
