@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 public class WorkDateConverter {
     @Builder
-    public static WorkDate SaveWorkDate(int userId, LocalDateTime startTime, LocalDateTime leaveTime) {
+    public static WorkDate SaveWorkDate(long userId, LocalDateTime startTime, LocalDateTime leaveTime) {
         return WorkDate.builder()
                 .scheduledLeaveTime(leaveTime)
                 .scheduledStartTime(startTime)

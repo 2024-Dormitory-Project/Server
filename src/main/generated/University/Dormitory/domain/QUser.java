@@ -32,7 +32,7 @@ public class QUser extends EntityPathBase<User> {
 
     public final ListPath<PostUser, QPostUser> postUsers = this.<PostUser, QPostUser>createList("postUsers", PostUser.class, QPostUser.class, PathInits.DIRECT2);
 
-    public final NumberPath<Integer> userId = createNumber("userId", Integer.class);
+    public final NumberPath<Long> userId = createNumber("userId", Long.class);
 
     public final ListPath<WorkDate, QWorkDate> workDates = this.<WorkDate, QWorkDate>createList("workDates", WorkDate.class, QWorkDate.class, PathInits.DIRECT2);
 

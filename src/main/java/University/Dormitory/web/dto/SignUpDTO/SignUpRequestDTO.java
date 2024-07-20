@@ -15,11 +15,9 @@ public class SignUpRequestDTO {
     @AllArgsConstructor
     public static class SignUpDto {
         @NotNull
-        int userId;
+        long userId;
         @NotNull
         Dormitory dormitory;
-        @NotNull
-        String password;
         @NotNull
         String authority;
         @NotNull
