@@ -28,7 +28,7 @@ public class UserConverter {
         return User.builder()
                 .userId(request.getUserId())
                 .name(request.getName())
-                .password(request.getPassword())
+                .password(request.getName())
                 .joinDate(LocalDate.now())
                 .dormitory(request.getDormitory())
                 .authority(authority)
