@@ -22,7 +22,11 @@ public class QWorkScheduleChange extends EntityPathBase<WorkScheduleChange> {
 
     public static final QWorkScheduleChange workScheduleChange = new QWorkScheduleChange("workScheduleChange");
 
+    public final QUser acceptor;
+
     public final DateTimePath<java.time.LocalDateTime> afterChangeDate = createDateTime("afterChangeDate", java.time.LocalDateTime.class);
+
+    public final QUser applicant;
 
     public final DateTimePath<java.time.LocalDateTime> beforeChangeDate = createDateTime("beforeChangeDate", java.time.LocalDateTime.class);
 
@@ -30,9 +34,7 @@ public class QWorkScheduleChange extends EntityPathBase<WorkScheduleChange> {
 
     public final DateTimePath<java.time.LocalDateTime> timeHappend = createDateTime("timeHappend", java.time.LocalDateTime.class);
 
-    public final QUser user1;
-
-    public final QUser user2;
+    public final StringPath type = createString("type");
 
     public QWorkScheduleChange(String variable) {
         this(WorkScheduleChange.class, forVariable(variable), INITS);
@@ -52,8 +54,8 @@ public class QWorkScheduleChange extends EntityPathBase<WorkScheduleChange> {
 
     public QWorkScheduleChange(Class<? extends WorkScheduleChange> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.user1 = inits.isInitialized("user1") ? new QUser(forProperty("user1")) : null;
-        this.user2 = inits.isInitialized("user2") ? new QUser(forProperty("user2")) : null;
+        this.acceptor = inits.isInitialized("acceptor") ? new QUser(forProperty("acceptor")) : null;
+        this.applicant = inits.isInitialized("applicant") ? new QUser(forProperty("applicant")) : null;
     }
 
 }
