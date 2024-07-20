@@ -10,6 +10,7 @@ public class SignInResponseDTO {
     @Setter
     @Builder
     public static class SignInSuccess {
+        private boolean isSuccess;
         private String message;
         private String token;
     }
@@ -18,6 +19,12 @@ public class SignInResponseDTO {
     @Setter
     public static class SignInFail {
         private String message;
+    }
+
+    @Builder
+    @Setter
+    public static class RefreshToken {
+        private String token;
     }
 
 }

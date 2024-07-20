@@ -13,8 +13,7 @@ public class SignUpResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class SignUpDto {
-        LocalDate date;
-        private long userId;
-        private String name;
+        private boolean isSuccess;
+        private String message;
     }
 }
