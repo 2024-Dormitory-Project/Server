@@ -1,15 +1,14 @@
 package University.Dormitory.exception.Handler;
 
-
 import lombok.Getter;
 
 @Getter
-public class UserNotFoundException extends RuntimeException{
+public class UndefinedWorkDate extends RuntimeException{
     String Message;
     String Error;
-    public UserNotFoundException(String Message) {
+    public UndefinedWorkDate(String Message) {
         super(Message);
-        this.Error = "USER_NOT_FOUND";
+        this.Error = "WORK_NOT_FOUND";
         this.Message = Message;
     }
 }

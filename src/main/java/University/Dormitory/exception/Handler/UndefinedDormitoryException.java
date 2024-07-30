@@ -3,12 +3,12 @@ package University.Dormitory.exception.Handler;
 import lombok.Getter;
 
 @Getter
-public class UndefinedAuthorityException extends RuntimeException {
+public class UndefinedDormitoryException extends RuntimeException{
     String Message;
     String Error;
-    public UndefinedAuthorityException(String message) {
+    public UndefinedDormitoryException(String message) {
         super(message);
-        this.Error = "UNDEFINED_AUTHORITY";
+        this.Error = "UNDEFINED_DORMITORY";
         this.Message = message;
     }
 }

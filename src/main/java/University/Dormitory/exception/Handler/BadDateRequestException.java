@@ -5,12 +5,12 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class UserAlreadyExistException extends RuntimeException{
+public class BadDateRequestException extends RuntimeException {
     private final String Message;
     private final String Error;
-    public UserAlreadyExistException(String message) {
+    public BadDateRequestException(String message) {
         super(message);
-        this.Error = "USER_ALREADY_EXIST";
+        this.Error = "BAD_DATE_REQUEST";
         this.Message = message;
     }
 }
