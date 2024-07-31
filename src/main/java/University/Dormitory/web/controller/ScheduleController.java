@@ -25,7 +25,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static University.Dormitory.domain.QWorkDate.workDate;
-@Transactional
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -53,14 +52,11 @@ public class ScheduleController {
     }
 
     @PostMapping("/scheduleworktime")
-    public MainResponseDTO.Work saveNewSchedule(@RequestBody WorkRequestDTO.SaveWork saveWork) {
+    public MainResponseDTO.Work saveNewSchedule(@RequestBody List<WorkRequestDTO.worker> saveWork) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        HashMap<String, List<String>> workerList = saveWork.getWorkerList();
-        for (Map.Entry<String, List<String>> stringListEntry : workerList.entrySet()) {
-            log.info("키값. 이름 : {}", stringListEntry.getKey());
-            log.info("시간 리스트. : {}", stringListEntry.getValue().toString());
-        }
-        String s = workCommandService.saveNewWork(workerList, formatter);
+        log.info("{}" ,saveWork.get(0).getName());
+        log.info("{}" ,saveWork.get(1).getName());
+        String s = workCommandService.saveNewWork(saveWork, formatter);
         return MainResponseDTO.Work.builder()
                 .message(s)
                 .isSuccess(true)
