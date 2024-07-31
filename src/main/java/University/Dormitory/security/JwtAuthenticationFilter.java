@@ -1,8 +1,8 @@
 package University.Dormitory.security;
 
-import University.Dormitory.domain.User;
-import University.Dormitory.exception.Handler.UserNotFoundException;
 import University.Dormitory.repository.JPARepository.UserRepository;
+import University.Dormitory.web.dto.MainPageDTO.MainResponseDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -23,6 +24,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
 
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -45,41 +47,60 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+        try {
+            String accessToken = jwtTokenProvider.resolveAccessToken(request);
+            LOGGER.info("[doFilterInternal] accessToken 값 추출 완료. accessToken : {} ", accessToken);
 
-        String accessToken = jwtTokenProvider.resolveAccessToken(request);
-        LOGGER.info("[doFilterInternal] accessToken 값 추출 완료. accessToken{} ", accessToken);
-
-        LOGGER.info("[doFilterInternal] token 값 유효성 체크 시작");
-        if (accessToken != null && jwtTokenProvider.validateAccessToken(accessToken)) {
-            Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            LOGGER.info("[doFilterInternal] access token 값 유효성 체크 완료");
-            filterChain.doFilter(request, response);
-            return;
-        } else {
-            // Access Token이 유효하지 않은 경우
-            LOGGER.info("[doFilterInternal] access token 값 유효성 체크 실패");
-            String refreshToken = jwtTokenProvider.resolveRefreshToken(request);
-            LOGGER.info("[doFilterInternal] refresh token 값 추출 완료. token{} ", refreshToken);
-
-            if (refreshToken != null && jwtTokenProvider.validateRefreshToken(refreshToken)) {
-                // Refresh Token이 유효한 경우
-                LOGGER.info("[doFilterInternal] refresh token 값 유효성 체크 완료");
-                long userIdFromRefreshToken = Long.parseLong(jwtTokenProvider.getUserIdFromRefreshToken(refreshToken));
-                User user = userRepository.findById(userIdFromRefreshToken).orElseThrow(
-                        () -> new UserNotFoundException("해당 ID를 찾지 못했습니다.")
-                );
-                String newAccessToken = jwtTokenProvider.createAccessToken(String.valueOf(userIdFromRefreshToken), user.getAuthority(), user.getName(), user.getDormitory());
-                response.setHeader("Authorization", "Bearer " + newAccessToken);
-                LOGGER.info("[doFilterInternal] new access token 발급 완료");
+            LOGGER.info("[doFilterInternal] token 값 유효성 체크 시작");
+            if (accessToken != null && jwtTokenProvider.validateAccessToken(accessToken)) {
+                Authentication authentication = jwtTokenProvider.getAuthenticationFromAccessToken(accessToken);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                LOGGER.info("[doFilterInternal] access token 값 유효성 체크 완료");
                 filterChain.doFilter(request, response);
                 return;
             } else {
-                // Refresh Token도 유효하지 않은 경우
-                LOGGER.info("[doFilterInternal] refresh token 값 유효성 체크 실패");
-                throw new RuntimeException("유효값 실패");
-//                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
+                // Access Token이 유효하지 않은 경우
+                String refreshToken = jwtTokenProvider.resolveRefreshToken(request);
+//           만약 /refresh로 접근한 경우 refresh토큰에 있는 ROlE 검증
+                if (path.startsWith("/refresh") && jwtTokenProvider.validateRefreshToken(refreshToken)) {
+                    Authentication authentication = jwtTokenProvider.getAuthenticationFromRefreshToken(refreshToken);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    LOGGER.info("Refresh토큰 권한 검증");
+                    filterChain.doFilter(request, response);
+                    return;
+                } else {//수정필요 아직 json으로 return이 안됨
+                    LOGGER.info("토큰 유효기간 만료");
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 Unauthorized
+                    response.setContentType("application/json");
+                    response.setCharacterEncoding("utf-8");
+                    MainResponseDTO.ServeletResponse error = new MainResponseDTO.ServeletResponse();
+                    error.setIsSuccess(false);
+                    error.setMessage("INVALID_TOKEN");
+                    String result = objectMapper.writeValueAsString(error);
+                    response.getWriter().write(result);
+                    response.getWriter().flush();
+                }
             }
+        } catch (AuthenticationException e) {
+            LOGGER.info("허가되지 않은 권한이 접근하였습니다");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.setCharacterEncoding("utf-8");
+            MainResponseDTO.ServeletResponse error = new MainResponseDTO.ServeletResponse();
+            error.setIsSuccess(false);
+            error.setMessage("허가되지 않은 접근입니다");
+            String result = objectMapper.writeValueAsString(error);
+            response.getWriter().write(result);
+        } catch (RuntimeException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setContentType("application/json");
+            response.setCharacterEncoding("utf-8");
+            MainResponseDTO.ServeletResponse error = new MainResponseDTO.ServeletResponse();
+            error.setIsSuccess(false);
+            error.setMessage("잘못된 요청입니다");
+            String result = objectMapper.writeValueAsString(error);
+            response.getWriter().write(result);
         }
+
     }
 }

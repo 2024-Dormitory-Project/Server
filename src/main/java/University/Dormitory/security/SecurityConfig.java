@@ -35,6 +35,7 @@ public class SecurityConfig{
                                 .requestMatchers("/error").permitAll()
                                 .requestMatchers("/favicon.ico").permitAll()
                                 .requestMatchers("/signin/**").permitAll()
+                                .requestMatchers("/refresh").hasAnyRole("ASSISTANT", "SCHEDULE_ASSISTANT", "PERFECT")
                                 .requestMatchers("/assistant/**").hasAnyRole("ASSISTANT", "SCHEDULE_ASSISTANT", "PERFECT")
                                 .requestMatchers("/schedule/**").hasAnyRole("SCHEDULE_ASSISTANT", "PERFECT")
                                 .requestMatchers("/perfect/**").permitAll()//hasRole("PERFECT") -> Swagger 회원가입을 위해 잠깐 모두 승인 처리

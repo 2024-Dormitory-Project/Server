@@ -55,10 +55,11 @@ public class JwtTokenProvider {
         return token;
     }
 
-    public String createRefreshToken(String userId) {
+    public String createRefreshToken(String userId, Authority authority) {
         LOGGER.info("[CREATE REFRESH TOKEN] 토큰 생성 시작");
         LOGGER.info("UserId를 가지고 있는 REFRESH 토큰입니다.");
         Claims claims = Jwts.claims().setSubject(userId);
+        claims.put("Authority", authority);
         Date now = new Date();
         long tokenValidMillsecond = 1000L * 60 * 60 * 24 * 90; //세달
         String token = Jwts.builder().setClaims(claims).setIssuedAt(now).setExpiration(new Date(now.getTime() + tokenValidMillsecond))
@@ -68,8 +69,8 @@ public class JwtTokenProvider {
         return token;
     }
 
-    public Authentication getAuthentication(String token) {
-        LOGGER.info("[getAuthentication] 토큰 인증 정보 조회 시작");
+    public Authentication getAuthenticationFromAccessToken(String token) {
+        LOGGER.info("[getAuthenticationFromAccessToken] 토큰 인증 정보 조회 시작");
         if (StringUtils.hasText(token) && token.startsWith("Bearer ")) {
             token =  token.substring(7);
         }
@@ -78,14 +79,24 @@ public class JwtTokenProvider {
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
+    public Authentication getAuthenticationFromRefreshToken(String token) {
+        LOGGER.info("[getAuthenticationFromRefreshToken] 토큰 인증 정보 조회 시작");
+        if (StringUtils.hasText(token) && token.startsWith("Bearer ")) {
+            token =  token.substring(7);
+        }
+        UserDetails userDetails = userDetailsService.loadUserByUsername(this.getUserIdFromAcessToken(token));
+        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+    }
+
     public String getUserIdFromAcessToken(String token) {
         LOGGER.info("로그인 추출");
-        LOGGER.info("[getUsername] 토큰 기반 회원 구별 정보 추출");
+        LOGGER.info("[getUserId] 토큰 기반 회원 구별 정보 추출");
         if (StringUtils.hasText(token) && token.startsWith("Bearer ")) {
             token =  token.substring(7);
         }
         String info = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
-        LOGGER.info("[getUsername] 토큰 기반 회원 구별 정보 추출 완료, info:{}", info);
+
+        LOGGER.info("[getUserId] 토큰 기반 회원 구별 정보 추출 완료, ID:{}", info);
         return info;
     }
 
@@ -94,7 +105,7 @@ public class JwtTokenProvider {
             token =  token.substring(7);
         }
         Claims body = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
-        return (String) body.get("name");
+        return body.get("Name", String.class);
     }
 
 
@@ -157,7 +168,6 @@ public class JwtTokenProvider {
             }
             Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(refreshToken);
             result = !claims.getBody().getExpiration().before(new Date());
-            result = refreshTokenRepository.existsByRefreshToken(refreshToken);
             return result;
         } catch (Exception e) {
             LOGGER.info("[validateRefreshToken] refresh 토큰 유효 체크 예외 발생");
