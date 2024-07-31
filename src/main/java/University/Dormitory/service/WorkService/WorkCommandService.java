@@ -128,5 +128,5 @@ public interface WorkCommandService {
     /**
      * 원래 controller에서 구현했으나 transaction 오류 통채로 서비스 구간으로 이동
      */
-    String saveNewWork(List<WorkRequestDTO.worker> workerList, DateTimeFormatter formatter);
+    String saveNewWork(List<WorkRequestDTO.worker> workerList);
 }
