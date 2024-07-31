@@ -1,20 +1,26 @@
 package University.Dormitory.service.WorkService;
 
-import University.Dormitory.web.dto.WorkDateDTO.WorkDateRequestDTO;
+import University.Dormitory.domain.Enum.Dormitory;
+import University.Dormitory.domain.WorkScheduleChange;
+import University.Dormitory.web.dto.WorkDTO.WorkRequestDTO;
+import com.querydsl.core.Tuple;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
 
 public interface WorkCommandService {
     /**
-     * 스케줄 상 해당 학번의 출/퇴근 시간을 바꿔야 할 경우.
+     * 스케줄 저장 혹은 수정
      *
      *@param userId 학번
      *@param scheduledStartTime 스케줄 상 근무 시작 시간
      * @param wantStartTime 변경하려는 출근 시간
      *@param wantLeaveTime 변경하려는 퇴근 시간
      */
-    public String changeScheduleTimeByUserId(long userId,
+    public String changeOrSaveScheduleTimeByUserId(long userId,
                                           LocalDateTime scheduledStartTime, LocalDateTime wantStartTime,
                                           LocalDateTime wantLeaveTime);
 
@@ -73,8 +79,6 @@ public interface WorkCommandService {
      * @param startTime 근무 시작 시간
      * @param leaveTime 근무 종료 시간
      */
-//    출/퇴근 근무시간 넣기 기능
-    String saveWorkByUserId(long userId, LocalDateTime startTime, LocalDateTime leaveTime);
 
 
     /**
@@ -96,4 +100,33 @@ public interface WorkCommandService {
      * @param date2 수락자의 날짜
      */
     String exchangePostWorkByUserId(long userId1, LocalDate date, long userId2, LocalDate date2);
+
+    /**
+     * 출근시간 저장하기
+     * @param userId 유저아이디
+     * @param localDateTime 출근시간
+     * @return
+     */
+    String startWork(long userId, LocalDateTime schedueldTime, LocalDateTime ActualTime);
+
+    /**
+     * 스케줄 지우기
+     * @param dormitory
+     * @param date
+     * @return
+     */
+    String delteSchedule(Dormitory dormitory,LocalDate date);
+
+    /**
+     * 실제 출근시간 및 스케줄 시간 가져오기
+     *
+     */
+    List<Tuple> actualWorkTime(long userId, LocalDate date);
+
+    List<WorkScheduleChange> changeHistoryList(long userId, LocalDate date);
+
+    /**
+     * 원래 controller에서 구현했으나 transaction 오류 통채로 서비스 구간으로 이동
+     */
+    String saveNewWork(List<WorkRequestDTO.worker> workerList, DateTimeFormatter formatter);
 }

@@ -36,7 +36,7 @@ public class DateCommandServiceImpl implements DateCommandService {
     }
 
     @Override
-    public List<LocalDate> myworkdays(int year, int month, long userId) {
-        return null;
+    public List<LocalDate> myWorkdays(int year, int month, long userId) {
+        return customRepository.getExistingWorkDates(userId, year, month);
     }
 }

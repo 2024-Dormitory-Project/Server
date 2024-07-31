@@ -8,9 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.MultiValueMap;
 
 import java.time.LocalDate;
-import java.util.Map;
 
 
 @Service
@@ -23,7 +23,7 @@ public class DormitoryCommandServiceImpl implements DormitoryCommandService {
     private final CustomRepository customRepository;
 
     @Override
-    public Map<String, CustomRepository.WorkTime> viewDormitoryWorkers(LocalDate date, Dormitory dormitory) {
+    public MultiValueMap<String, CustomRepository.WorkTime> viewDormitoryWorkers(LocalDate date, Dormitory dormitory) {
         try {
             return customRepository.findDormitoryWorkersNameByDateAndDormitory(date, dormitory);
         }
@@ -36,6 +36,5 @@ public class DormitoryCommandServiceImpl implements DormitoryCommandService {
     @Override
     public String viewPostWorker(LocalDate date) {
         return null;
-
     }
 }
