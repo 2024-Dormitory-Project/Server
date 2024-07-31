@@ -15,7 +15,6 @@ import University.Dormitory.security.JwtTokenProvider;
 import University.Dormitory.web.dto.SignUpDTO.SignUpRequestDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +48,7 @@ public class UserCommandServiceImpl implements UserCommandService {
         userRepository.save(user);
         return "회원 권한 수정 완료";
     }
+
     @Override
     public boolean checkUserIdDuplicate(long userId) {
         return userRepository.existsById(userId);
@@ -98,7 +98,7 @@ public class UserCommandServiceImpl implements UserCommandService {
 
         // Access Token 생성
         String accessToken = jwtTokenProvider.createAccessToken(String.valueOf(userId), authoritiesByUserId, userName, dormitory);
-        String refreshToken = jwtTokenProvider.createRefreshToken(String.valueOf(userId));
+        String refreshToken = jwtTokenProvider.createRefreshToken(String.valueOf(userId), authoritiesByUserId);
         Map<String, String> tokens = new HashMap<>();
         tokens.put("accessToken", accessToken);
         tokens.put("refreshToken", refreshToken);
@@ -112,8 +112,7 @@ public class UserCommandServiceImpl implements UserCommandService {
 
     @Override
     public Optional<Long> findUserIdByName(String name) {
-        Optional<Long> userIdByName = customRepository.findUserIdByName(name);
-        return userIdByName;
+        return customRepository.findUserIdByName(name);
     }
 
     @Override
