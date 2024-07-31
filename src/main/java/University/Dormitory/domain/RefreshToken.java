@@ -7,6 +7,9 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+
+import java.time.LocalDate;
 
 
 @Entity
@@ -18,4 +21,7 @@ public class RefreshToken {
     long userId;
 
     String refreshToken;
+
+    @CreatedDate
+    private LocalDate createdDate;
 }

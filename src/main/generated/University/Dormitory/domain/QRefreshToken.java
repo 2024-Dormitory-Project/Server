@@ -19,6 +19,8 @@ public class QRefreshToken extends EntityPathBase<RefreshToken> {
 
     public static final QRefreshToken refreshToken1 = new QRefreshToken("refreshToken1");
 
+    public final DatePath<java.time.LocalDate> createdDate = createDate("createdDate", java.time.LocalDate.class);
+
     public final StringPath refreshToken = createString("refreshToken");
 
     public final NumberPath<Long> userId = createNumber("userId", Long.class);
