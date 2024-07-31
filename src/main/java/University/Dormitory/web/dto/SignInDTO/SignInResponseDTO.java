@@ -9,18 +9,33 @@ public class SignInResponseDTO {
     @Getter
     @Setter
     @Builder
-    public static class SignInDto {
+    public static class SignInSuccess {
+        private boolean isSuccess;
+        private String message;
+        private String accessToken;
+        private String refreshToken;
+    }
+
+    @Builder
+    @Setter
+    @Getter
+    public static class SignInFail {
+        private String message;
+    }
+
+    @Builder
+    @Setter
+    @Getter
+    public static class RefreshToken {
         private String token;
     }
 
     @Builder
     @Setter
-    public static class SignInFail {
-        private String message;
-
-        public SignInFail(String message) {
-            this.message = message;
-        }
+    @Getter
+    public static class NewAccessToken {
+        private boolean isSuccess;
+        private String accessToken;
     }
 
 }

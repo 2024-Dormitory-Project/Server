@@ -1,13 +1,12 @@
 package University.Dormitory.security;
 
+import University.Dormitory.repository.JPARepository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -17,6 +16,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig{
     private final JwtTokenProvider jwtTokenProvider;
+    private final UserRepository userRepository;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -32,11 +32,14 @@ public class SecurityConfig{
                                 .requestMatchers(HttpMethod.GET, "/v3/api-docs/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/swagger-resources/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/webjars/**").permitAll()
-                                .requestMatchers("/login/**").permitAll()
-                                .requestMatchers("/ASSISTANT/**").hasAnyRole("ASSISTANT", "SCHEDULE_ASSISTANT", "PERFECT")
-                                .requestMatchers("/SCHEDULE_ASSISTANT/**").hasAnyRole("SCHEDULE_ASSISTANT", "PERFECT")
-                                .requestMatchers("/PERFECT/**").hasRole("PERFECT")
-                                .anyRequest().permitAll()
+                                .requestMatchers("/error").permitAll()
+                                .requestMatchers("/favicon.ico").permitAll()
+                                .requestMatchers("/signin/**").permitAll()
+                                .requestMatchers("/refresh").hasAnyRole("ASSISTANT", "SCHEDULE_ASSISTANT", "PERFECT")
+                                .requestMatchers("/assistant/**").hasAnyRole("ASSISTANT", "SCHEDULE_ASSISTANT", "PERFECT")
+                                .requestMatchers("/schedule/**").hasAnyRole("SCHEDULE_ASSISTANT", "PERFECT")
+                                .requestMatchers("/perfect/**").permitAll()//hasRole("PERFECT") -> Swagger 회원가입을 위해 잠깐 모두 승인 처리
+                                .anyRequest().authenticated()
                 )
                 .logout(logout ->
                         logout
@@ -48,7 +51,7 @@ public class SecurityConfig{
                         configurer.accessDeniedPage("/access-denied") // 권한 없을 시 접근할 페이지
                 )
                 .csrf().disable()
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userRepository), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

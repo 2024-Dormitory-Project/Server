@@ -1,5 +1,5 @@
 package University.Dormitory.domain.Enum;
 
 public enum Authority {
-    ASSISTANT, SCHEDULE_ASSISTANT, PERFECT
+    ROLE_ASSISTANT, ROLE_SCHEDULE_ASSISTANT, ROLE_PERFECT
 }

@@ -22,8 +22,6 @@ public class QWorkDate extends EntityPathBase<WorkDate> {
 
     public static final QWorkDate workDate = new QWorkDate("workDate");
 
-    public final DateTimePath<java.time.LocalDateTime> actualLeaveTime = createDateTime("actualLeaveTime", java.time.LocalDateTime.class);
-
     public final DateTimePath<java.time.LocalDateTime> actualStartTime = createDateTime("actualStartTime", java.time.LocalDateTime.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);

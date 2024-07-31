@@ -8,9 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.MultiValueMap;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 
 
 @Service
@@ -23,9 +23,14 @@ public class DormitoryCommandServiceImpl implements DormitoryCommandService {
     private final CustomRepository customRepository;
 
     @Override
-    public String viewDormitoryWorkers(LocalDate date, Dormitory dormitory) {
-        HashMap<String, CustomRepository.WorkTime> userNameDormitoryWorkersByDate = customRepository.findDormitoryWorkersNameByDate(date, dormitory);
-        return "DTO 만들어서 return";
+    public MultiValueMap<String, CustomRepository.WorkTime> viewDormitoryWorkers(LocalDate date, Dormitory dormitory) {
+        try {
+            return customRepository.findDormitoryWorkersNameByDateAndDormitory(date, dormitory);
+        }
+        catch(Exception e) {
+            throw new RuntimeException("기숙사 근무자를 보는 중 오류가 발생했습니다. 관리자에게 문의하세요. : " + e.getMessage());
+        }
+
     }
 
     @Override
