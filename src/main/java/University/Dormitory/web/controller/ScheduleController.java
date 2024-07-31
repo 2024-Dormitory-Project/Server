@@ -53,10 +53,10 @@ public class ScheduleController {
 
     @PostMapping("/scheduleworktime")
     public MainResponseDTO.Work saveNewSchedule(@RequestBody List<WorkRequestDTO.worker> saveWork) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        log.info("{}" ,saveWork.get(0).getName());
-        log.info("{}" ,saveWork.get(1).getName());
-        String s = workCommandService.saveNewWork(saveWork, formatter);
+        for (WorkRequestDTO.worker worker : saveWork) {
+            log.info("근무자 이름들 :{}", worker.getName());
+        }
+        String s = workCommandService.saveNewWork(saveWork);
         return MainResponseDTO.Work.builder()
                 .message(s)
                 .isSuccess(true)
