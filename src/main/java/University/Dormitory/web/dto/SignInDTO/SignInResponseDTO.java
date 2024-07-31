@@ -18,12 +18,14 @@ public class SignInResponseDTO {
 
     @Builder
     @Setter
+    @Getter
     public static class SignInFail {
         private String message;
     }
 
     @Builder
     @Setter
+    @Getter
     public static class RefreshToken {
         private String token;
     }
