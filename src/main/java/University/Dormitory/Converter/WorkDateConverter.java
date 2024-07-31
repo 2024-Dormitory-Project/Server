@@ -12,7 +12,7 @@ public class WorkDateConverter {
                 .scheduledLeaveTime(leaveTime)
                 .scheduledStartTime(startTime)
                 .Reason(null)
-                .actualLeaveTime(null)
+//                .actualLeaveTime(null)
                 .actualStartTime(null)
                 .build();
     }
