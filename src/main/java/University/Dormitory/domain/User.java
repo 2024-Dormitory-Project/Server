@@ -40,11 +40,13 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Authority authority;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = false)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = false, fetch = FetchType.LAZY)
 //    User가 삭제되더라도 해당 User의 근무 기록은 남아있어야 함. orphanRemoval = False로 설정
     private List<WorkDate> workDates = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = false)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = false, fetch = FetchType.LAZY)
+    //    Transaction에서 오류 발생해서 EAGER로 변경. 추후 LAZY로 바꿔야함.
+
     private List<PostUser> postUsers = new ArrayList<>();
 
     public void setPassword(String password) {
@@ -98,7 +100,6 @@ public class User implements UserDetails {
                 ", joinDate=" + joinDate +
                 ", name='" + name + '\'' +
                 ", authority=" + authority +
-                ", workDates=" + workDates +
                 '}';
     }
 }
