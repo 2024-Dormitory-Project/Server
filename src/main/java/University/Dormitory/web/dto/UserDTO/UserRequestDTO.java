@@ -1,12 +1,20 @@
 package University.Dormitory.web.dto.UserDTO;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class UserRequestDTO {
-    public static class findUserAuthorityDto {
-        int userId;
+    @Getter
+    public static class changeUserAuthorityDto {
+        long studentNumber;
+        String authority;
+        String name;
+        int dormitoryNum;
     }
 
-    public static class changeUserAuthorityDto {
-        int userId;
-        String updateAuthoirty;
+    @Getter
+    @Setter
+    public static class Token {
+        String token;
     }
 }

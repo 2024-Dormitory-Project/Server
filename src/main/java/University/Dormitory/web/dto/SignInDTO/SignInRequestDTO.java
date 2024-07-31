@@ -9,7 +9,7 @@ public class SignInRequestDTO {
     @Getter
     public static class SignInDto {
         @NotNull
-        private int userId;
+        private long userId;
         @NotNull
         private String password;
     }

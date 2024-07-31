@@ -12,7 +12,8 @@ public class SignInResponseDTO {
     public static class SignInSuccess {
         private boolean isSuccess;
         private String message;
-        private String token;
+        private String accessToken;
+        private String refreshToken;
     }
 
     @Builder
@@ -25,6 +26,14 @@ public class SignInResponseDTO {
     @Setter
     public static class RefreshToken {
         private String token;
+    }
+
+    @Builder
+    @Setter
+    @Getter
+    public static class NewAccessToken {
+        private boolean isSuccess;
+        private String accessToken;
     }
 
 }

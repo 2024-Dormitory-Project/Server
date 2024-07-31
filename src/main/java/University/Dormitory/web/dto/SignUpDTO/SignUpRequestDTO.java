@@ -10,7 +10,6 @@ public class SignUpRequestDTO {
 
     @Builder
     @Getter
-    @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     public static class SignUpDto {
@@ -21,6 +20,6 @@ public class SignUpRequestDTO {
         @NotNull
         String authority;
         @NotNull
-        String Name;
+        String name;
     }
 }
