@@ -2,10 +2,9 @@ package University.Dormitory.security;
 
 import University.Dormitory.domain.Enum.Authority;
 import University.Dormitory.domain.Enum.Dormitory;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import University.Dormitory.exception.Handler.InvalidTokenException;
+import University.Dormitory.repository.JPARepository.RefreshTokenRepository;
+import io.jsonwebtoken.*;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +27,8 @@ import java.util.Date;
 public class JwtTokenProvider {
     private final Logger LOGGER = LoggerFactory.getLogger(JwtTokenProvider.class);
     private final UserDetailsService userDetailsService;
+    private final RefreshTokenRepository refreshTokenRepository;
+
     @Value("${jwt.secret}")
     private String secretKey = "secretKey";
 
@@ -63,50 +64,103 @@ public class JwtTokenProvider {
         String token = Jwts.builder().setClaims(claims).setIssuedAt(now).setExpiration(new Date(now.getTime() + tokenValidMillsecond))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
-        LOGGER.info("[createAccessToken] 토큰 생성 완료");
+        LOGGER.info("[createAccessToken] 토큰 생성 완료, DB에 저장");
         return token;
     }
 
     public Authentication getAuthentication(String token) {
         LOGGER.info("[getAuthentication] 토큰 인증 정보 조회 시작");
-        UserDetails userDetails = userDetailsService.loadUserByUsername(this.getUserId(token));
-        LOGGER.info("[getAuthentication] 토큰 인증 정보 조회 완료, UserDetails UserName : {}", getUserId(token));
+        if (StringUtils.hasText(token) && token.startsWith("Bearer ")) {
+            token =  token.substring(7);
+        }
+        UserDetails userDetails = userDetailsService.loadUserByUsername(this.getUserIdFromAcessToken(token));
+        LOGGER.info("[getAuthentication] 토큰 인증 정보 조회 완료, UserDetails UserName : {}", getUserIdFromAcessToken(token));
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
-    public String getUserId(String token) {
+    public String getUserIdFromAcessToken(String token) {
         LOGGER.info("로그인 추출");
         LOGGER.info("[getUsername] 토큰 기반 회원 구별 정보 추출");
+        if (StringUtils.hasText(token) && token.startsWith("Bearer ")) {
+            token =  token.substring(7);
+        }
         String info = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
         LOGGER.info("[getUsername] 토큰 기반 회원 구별 정보 추출 완료, info:{}", info);
         return info;
     }
 
-    public String getUserName(String token) {
+    public String getUserNameFromAccessToken(String token) {
+        if (StringUtils.hasText(token) && token.startsWith("Bearer ")) {
+            token =  token.substring(7);
+        }
         Claims body = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
         return (String) body.get("name");
     }
 
 
-    public String resolveToken(HttpServletRequest request) {
+    public String resolveAccessToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
+        return null;
+    }
 
+    public String resolveRefreshToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Refresh-Token");
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
         return null;
     }
 
 
-    public boolean validateToken(String token) {
-        LOGGER.info("[validateToken] 토큰 유효 시작");
+    public boolean validateAccessToken(String token) {
+        LOGGER.info("[validateAccessToken] Access 토큰 유효 시작");
         try {
+            if (StringUtils.hasText(token) && token.startsWith("Bearer ")) {
+                token =  token.substring(7);
+            }
             Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
-
             return !claims.getBody().getExpiration().before(new Date());
-
         } catch (Exception e) {
-            LOGGER.info("[validateToken] 토큰 유효 체크 예외 발생");
+            LOGGER.info("[validateAccessToken] 토큰 유효 체크 예외 발생");
+            return false;
+        }
+    }
+    public String getUserIdFromRefreshToken(String refreshToken) {
+        LOGGER.info("[GET USER ID FROM REFRESH TOKEN] 토큰에서 사용자 ID 추출 시작");
+
+        try {
+            if (StringUtils.hasText(refreshToken) && refreshToken.startsWith("Bearer ")) {
+                refreshToken =  refreshToken.substring(7);
+            }
+            Claims claims = Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(refreshToken)
+                    .getBody();
+
+            String userId = claims.getSubject();
+            LOGGER.info("[GET USER ID FROM REFRESH TOKEN] 사용자 ID 추출 완료: {}", userId);
+            return userId;
+        } catch (JwtException e) {
+            LOGGER.error("[GET USER ID FROM REFRESH TOKEN] 토큰 검증 실패: {}", e.getMessage());
+            throw new InvalidTokenException("Invalid refresh token");
+        }
+    }
+
+    public boolean validateRefreshToken(String refreshToken) {
+        boolean result = true;
+        try {
+            if (StringUtils.hasText(refreshToken) && refreshToken.startsWith("Bearer ")) {
+                refreshToken =  refreshToken.substring(7);
+            }
+            Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(refreshToken);
+            result = !claims.getBody().getExpiration().before(new Date());
+            result = refreshTokenRepository.existsByRefreshToken(refreshToken);
+            return result;
+        } catch (Exception e) {
+            LOGGER.info("[validateRefreshToken] refresh 토큰 유효 체크 예외 발생");
             return false;
         }
     }
