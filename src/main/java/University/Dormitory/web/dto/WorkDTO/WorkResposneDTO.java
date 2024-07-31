@@ -1,8 +1,10 @@
 package University.Dormitory.web.dto.WorkDTO;
 
 import lombok.Builder;
+import lombok.Getter;
 
 public class WorkResposneDTO {
+    @Getter
     @Builder
     public static class workResult {
         Boolean isSuccess;
@@ -10,6 +12,7 @@ public class WorkResposneDTO {
     }
 
     @Builder
+    @Getter
     public static class exchangework {
         String status;
         String applicant;

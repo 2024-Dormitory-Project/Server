@@ -12,20 +12,19 @@ public class WorkRequestDTO {
         String userName;
         String year;
         String month;
-        String Day;
-        String Hour;
-        String Min;
+        String day;
+        String hour;
+        String min;
     }
 
     @Getter
     public static class exchangeWorkDto {
-        String userName1;
         int year1;
         int month1;
         int day1;
         int hour1;
         int min1;
-        String UserName2;
+        String userName2;
         int year2;
         int month2;
         int day2;

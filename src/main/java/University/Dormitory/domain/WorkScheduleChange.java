@@ -3,6 +3,7 @@ package University.Dormitory.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+//@EntityListeners(AuditingEntityListener.class)
 public class WorkScheduleChange {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,7 +32,6 @@ public class WorkScheduleChange {
     private LocalDateTime afterChangeDate;
 
     @CreatedDate
-    @Column(nullable = false)
     private LocalDateTime timeHappend;
 
     @Column

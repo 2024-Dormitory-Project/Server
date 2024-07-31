@@ -2,6 +2,7 @@ package University.Dormitory.web.dto.WorkDateDTO;
 
 import University.Dormitory.domain.WorkDate;
 import lombok.Builder;
+import lombok.Getter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,10 +17,12 @@ public class WorkDateResponseDTO {
     }
 
     @Builder
+    @Getter
     public static class calendarDto {
         List<LocalDate> workdates;
     }
     @Builder
+    @Getter
     public static class changeHistory {
         String status;
         String applicant;
