@@ -4,6 +4,7 @@ import University.Dormitory.domain.Enum.Authority;
 import University.Dormitory.domain.Enum.Dormitory;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,6 +31,7 @@ public class User implements UserDetails {
     private String password; //여기 이름이 들어갈 예정
 
     @Column(nullable = false)
+    @CreatedDate
     private LocalDate joinDate;
 
     @Column(nullable = false)

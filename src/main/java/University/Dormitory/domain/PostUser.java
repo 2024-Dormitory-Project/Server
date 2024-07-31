@@ -21,5 +21,6 @@ public class PostUser {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Column(nullable = false)
     private LocalDate postWorkDate;
 }
