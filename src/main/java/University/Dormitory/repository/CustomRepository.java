@@ -133,8 +133,6 @@ public class CustomRepository {
 //        return (int) workedHour;
 //    }아래와 동일
     public int countWorkHours(long userId, int year, int month) {
-        String monthString = String.format("%04d-%02d", year, month);
-
         List<WorkDate> list = query.selectFrom(workDate)
                 .where(workDate.user.userId.eq(userId)
                         .and(workDate.scheduledStartTime.year().eq(year))
@@ -144,9 +142,8 @@ public class CustomRepository {
         long workedHour = 0;
         for (WorkDate date : list) {
             Duration duration = Duration.between(date.getScheduledStartTime(), date.getScheduledLeaveTime());
-            workedHour += duration.toHours();
+            workedHour = workedHour + duration.toMinutes();
         }
-
         return (int) workedHour;
     }
 
@@ -276,7 +273,7 @@ public class CustomRepository {
     }
 
     @Getter
-    public class WorkTime {
+    public static class WorkTime {
         private LocalDateTime startTime;
         private LocalDateTime leaveTime;
 
