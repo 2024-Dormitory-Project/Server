@@ -42,7 +42,6 @@ public class AssistantController {
     WorkResposneDTO.workResult giveWork(HttpServletRequest request, @RequestBody WorkRequestDTO.giveWorkDto time) {
         String token = request.getHeader("Authorization");
         long userId1 = Long.parseLong(jwtTokenProvider.getUserIdFromAcessToken(token));
-
         LocalDateTime changeTime = LocalDateTime.of(
                 Integer.parseInt(time.getYear()), Integer.parseInt(time.getMonth()),
                 Integer.parseInt(time.getDay()), Integer.parseInt(time.getHour()), Integer.parseInt(time.getMin()));
@@ -51,7 +50,10 @@ public class AssistantController {
         if (acceptorUserId.isPresent()) {
             long userId2 = acceptorUserId.get();
             String s = workCommandService.giveMyWorkByUserIds(userId1, userId2, changeTime);
-            return WorkResposneDTO.workResult.builder().message(s).isSuccess(true).build();
+            return WorkResposneDTO.workResult.builder()
+                    .message(s)
+                    .isSuccess(true)
+                    .build();
         } else {
             throw new UserNotFoundException("해당 학번의 학생을 찾을 수 없습니다");
         }
@@ -85,10 +87,10 @@ public class AssistantController {
                                                     @RequestParam("year") int year) {
         Dormitory dormitory = DormitoryConverter.toDormitory(dormitoryNum);
         HashMap<Integer, List<String>> result = new HashMap<>();
-        List<String> names = new ArrayList<>();
         for (int i = 1; i <= LocalDate.of(year, month, 1).lengthOfMonth(); i++) {
             LocalDate date = LocalDate.of(year, month, i);
             MultiValueMap<String, CustomRepository.WorkTime> stringListMap = dormitoryCommandService.viewDormitoryWorkers(date, dormitory);
+            List<String> names = new ArrayList<>(stringListMap.keySet());
             names.addAll(stringListMap.keySet());
             result.put(i, names);
         }
@@ -164,9 +166,10 @@ public class AssistantController {
                                  @RequestParam("year") int year, @RequestParam("month") int month) {
         String token = request.getHeader("Authorization");
         long userId = Long.parseLong(jwtTokenProvider.getUserIdFromAcessToken(token));
+
         return MainResponseDTO.TimeDto.builder()
                 .time(dateCommandService.workHour(year, month, userId))
-                .day(dateCommandService.workDays(year, month, year)).
+                .day(dateCommandService.workDays(year, month, userId)).
                 build();
     }
 
