@@ -13,13 +13,13 @@ public class UserConverter {
         String authorityString = String.valueOf(request.getAuthority());
         switch (authorityString) {
             case "사감":
-                authority = Authority.PERFECT;
+                authority = Authority.ROLE_PERFECT;
                 break;
             case "스케줄 관리 조교":
-                authority = Authority.SCHEDULE_ASSISTANT;
+                authority = Authority.ROLE_SCHEDULE_ASSISTANT;
                 break;
             case "조교":
-                authority = Authority.ASSISTANT;
+                authority = Authority.ROLE_ASSISTANT;
                 break;
             default:
                 throw new UndefinedAuthorityException("정의되지 않은 권한입니다: " + authorityString);
