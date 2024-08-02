@@ -56,7 +56,7 @@ public interface WorkCommandService {
      * @param reason 사유
      * @param date 사유 쓸 날짜. 이 날짜는 스케줄상의 날짜임.
      */
-    String writeReasonByUserId(long userId, String reason, LocalDateTime date);
+    String writeReasonByUserId(long userId, String reason, String date);
 
 
 
