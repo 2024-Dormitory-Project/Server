@@ -18,9 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Transactional
@@ -99,7 +99,7 @@ public class UserCommandServiceImpl implements UserCommandService {
         // Access Token 생성
         String accessToken = jwtTokenProvider.createAccessToken(String.valueOf(userId), authoritiesByUserId, userName, dormitory);
         String refreshToken = jwtTokenProvider.createRefreshToken(String.valueOf(userId), authoritiesByUserId);
-        Map<String, String> tokens = new HashMap<>();
+        Map<String, String> tokens = new ConcurrentHashMap<>();
         tokens.put("accessToken", accessToken);
         tokens.put("refreshToken", refreshToken);
         return tokens;
