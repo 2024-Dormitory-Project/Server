@@ -39,7 +39,6 @@ public class WorkCommandServiceImpl implements WorkCommandService {
     private final PostUserRepository postUserRepository;
     private final UserRepository userRepository;
     private final WorkScheduleChangeRepository workScheduleChangeRepository;
-    private final UserCommandService userCommandService;
 
     @Override
     public String changeOrSaveScheduleTimeByUserId(long userId,
@@ -178,13 +177,19 @@ public class WorkCommandServiceImpl implements WorkCommandService {
     }
 
     @Override
-    public String writeReasonByUserId(long userId, String reason, LocalDateTime date) {
+    public String writeReasonByUserId(long userId, String reason, String time) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        LocalDateTime date = LocalDateTime.parse(time, formatter);
+        log.info("사유 : {}, 시간 : {}", reason, date);
         int length = reason.length();
         if (length > 254) {
             throw new TooLongException("글자 수가 너무 많습니다. 관리자에게 문의하거나 길이를 줄여주세요");
         }
         try {
             long l = customRepository.writeReason(userId, reason, date);
+            if(l==0) {
+                throw new BadDateRequestException("일치하는 날짜가 없습니다. 출근했던 시간을 다시 주세요");
+            }
         } catch (Exception e) {
             throw new RuntimeException("사유 작성 저장 도중 에러가 발생했습니다. 관리자에게 문의해주세요" + e.getMessage());
         }

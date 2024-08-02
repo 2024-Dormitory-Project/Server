@@ -19,8 +19,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
+import static University.Dormitory.domain.QPostUser.postUser;
 import static University.Dormitory.domain.QUser.user;
 import static University.Dormitory.domain.QWorkDate.workDate;
 import static University.Dormitory.domain.QWorkScheduleChange.workScheduleChange;
@@ -28,11 +31,9 @@ import static University.Dormitory.domain.QWorkScheduleChange.workScheduleChange
 @Slf4j
 @Repository
 public class CustomRepository {
-    private final EntityManager em;
     private final JPAQueryFactory query;
 
     public CustomRepository(EntityManager em) {
-        this.em = em;
         this.query = new JPAQueryFactory(em);
     }
 
@@ -41,6 +42,7 @@ public class CustomRepository {
                 .where(user.userId.eq(userId))
                 .fetchOne();
     }
+
     public String findPasswordByUserId(long userId) {
         return query.select(user.password).
                 from(user)
@@ -270,6 +272,22 @@ public class CustomRepository {
                 .fetch();
 
         return !results.isEmpty();
+    }
+
+    public Map<Integer, List<String>> postworkes(LocalDate date) {
+        List<Tuple> fetch = query.select(postUser.user.name, postUser.postWorkDate.dayOfMonth())
+                .where(postUser.postWorkDate.year().eq(date.getYear())
+                        .and(postUser.postWorkDate.month().eq(date.getMonthValue())))
+                .fetch();
+        Map<Integer, List<String>> workerList = new ConcurrentHashMap<>();
+        for (Tuple tuple : fetch) {
+            Integer day = tuple.get(postUser.postWorkDate.dayOfMonth());
+            String name = tuple.get(postUser.user.name);
+
+            // 날짜가 존재하지 않으면 새로운 리스트를 생성하고 추가
+            workerList.computeIfAbsent(day, k -> new ArrayList<>()).add(name);
+        }
+        return workerList;
     }
 
     @Getter

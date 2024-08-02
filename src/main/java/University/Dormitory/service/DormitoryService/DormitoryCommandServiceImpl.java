@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
 
 @Service
@@ -34,7 +36,8 @@ public class DormitoryCommandServiceImpl implements DormitoryCommandService {
     }
 
     @Override
-    public String viewPostWorker(LocalDate date) {
-        return null;
+    public Map<Integer, List<String>> viewPostWorker(LocalDate date) {
+        Map<Integer, List<String>> postworkes = customRepository.postworkes(date);
+        return postworkes;
     }
 }

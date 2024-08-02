@@ -2,8 +2,8 @@ package University.Dormitory.web.controller;
 
 import University.Dormitory.Converter.DormitoryConverter;
 import University.Dormitory.domain.Enum.Dormitory;
-import University.Dormitory.exception.Handler.BadDateRequestException;
 import University.Dormitory.exception.Handler.UserNotFoundException;
+import University.Dormitory.exception.Handler.WrongPathRequestException;
 import University.Dormitory.repository.CustomRepository;
 import University.Dormitory.service.DormitoryService.DormitoryCommandService;
 import University.Dormitory.service.UserService.UserCommandService;
@@ -15,16 +15,17 @@ import University.Dormitory.web.dto.WorkDTO.WorkRequestDTO;
 import com.querydsl.core.Tuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import static University.Dormitory.domain.QWorkDate.workDate;
+
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -34,24 +35,33 @@ public class ScheduleController {
     private final UserCommandService userCommandService;
     private final DormitoryCommandService dormitoryCommandService;
 
-    @GetMapping("/scheduleworktime")
-    HashMap<Integer, List<String>> scheduleWorkTime(@RequestParam("dormitory") int dormitoryNum, @RequestParam("year") int year, @RequestParam("month") int month) {
-        Dormitory dormitory = DormitoryConverter.toDormitory(dormitoryNum);
-        HashMap<Integer, List<String>> result = new HashMap<>();
-        for (int i = 1; i <= LocalDate.of(year, month, 1).lengthOfMonth(); i++) {
-            LocalDate date = LocalDate.of(year, month, i);
-            MultiValueMap<String, CustomRepository.WorkTime> stringListMap = dormitoryCommandService.viewDormitoryWorkers(date, dormitory);
-            if (stringListMap.isEmpty()) {
-                result.put(i, new ArrayList<>());
-            } else {
-                List<String> names = new ArrayList<>(stringListMap.keySet());
-                result.put(i, names);
+    @GetMapping("/scheduleworktime/{type}")
+    Map<Integer, List<String>> scheduleWorkTime(@PathVariable("type") String type,
+                                                              @RequestParam("year") int year, @RequestParam("month") int month) {
+        if (type.equals("1") || type.equals("2") || type.equals("3")) { //기숙사 조회인 경우
+            int dormitoryNum = Integer.parseInt(type);
+            Dormitory dormitory = DormitoryConverter.toDormitory(dormitoryNum);
+            Map<Integer, List<String>> result = new ConcurrentHashMap<>();
+            for (int i = 1; i <= LocalDate.of(year, month, 1).lengthOfMonth(); i++) {
+                LocalDate date = LocalDate.of(year, month, i);
+                MultiValueMap<String, CustomRepository.WorkTime> stringListMap = dormitoryCommandService.viewDormitoryWorkers(date, dormitory);
+                if (stringListMap.isEmpty()) {
+                    result.put(i, new ArrayList<>());
+                } else {
+                    List<String> names = new ArrayList<>(stringListMap.keySet());
+                    result.put(i, names);
+                }
             }
+            return result;
+        } else if (type.equals("post")) { //우편근무 조회인 경우
+            LocalDate date = LocalDate.of(year, month, 1);
+            return dormitoryCommandService.viewPostWorker(date);
+        } else { //type에 이상한 값이 들어간 경우
+            throw new WrongPathRequestException("인 경로는 존재하지 않습니다", type);
         }
-        return result;
     }
 
-    @PostMapping("/scheduleworktime")
+    @PostMapping("/scheduleworktime/{type}")
     public MainResponseDTO.Work saveNewSchedule(@RequestBody List<WorkRequestDTO.worker> saveWork) {
         for (WorkRequestDTO.worker worker : saveWork) {
             log.info("근무자 이름들 :{}", worker.getName());
@@ -63,7 +73,7 @@ public class ScheduleController {
                 .build();
     }
 
-    @DeleteMapping("/scheduleworktime")
+    @DeleteMapping("/scheduleworktime/{type}")
     MainResponseDTO.Work deleteSchedule(@RequestBody ScheduleRequestDTO.todayWorkersDetailDto info) {
         Dormitory dormitory = DormitoryConverter.toDormitory(info.getDormitoryNum());
         LocalDate date = LocalDate.of(info.getYear(), info.getMonth(), info.getDay());
