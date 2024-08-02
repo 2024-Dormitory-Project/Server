@@ -1,8 +1,7 @@
 package University.Dormitory.security;
 
-import University.Dormitory.repository.JPARepository.UserRepository;
-import University.Dormitory.web.dto.MainPageDTO.MainResponseDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,6 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        ObjectNode json = new ObjectMapper().createObjectNode();
         String path = request.getRequestURI();
         LOGGER.info("[path]: {}", path);
         // Swagger UI와 관련된 경로를 허용
@@ -67,39 +67,39 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     LOGGER.info("Refresh토큰 권한 검증");
                     filterChain.doFilter(request, response);
                     return;
-                } else {//수정필요 아직 json으로 return이 안됨
+                } else {
                     LOGGER.info("토큰 유효기간 만료");
+                    json.put("isSuccess", false);
+                    json.put("Error", "INVALID_TOKEN");
+                    json.put("Message", "토큰 유효기간이 지났습니다.");
+                    String newResponse = new ObjectMapper().writeValueAsString(json);
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 Unauthorized
                     response.setContentType("application/json");
                     response.setCharacterEncoding("utf-8");
-                    MainResponseDTO.ServeletResponse error = new MainResponseDTO.ServeletResponse();
-                    error.setIsSuccess(false);
-                    error.setMessage("INVALID_TOKEN");
-                    String result = objectMapper.writeValueAsString(error);
-                    response.getWriter().write(result);
-                    response.getWriter().flush();
+                    response.setContentLength(newResponse.length());
+                    response.getOutputStream().write(newResponse.getBytes());
                 }
             }
         } catch (AuthenticationException e) {
             LOGGER.info("허가되지 않은 권한이 접근하였습니다");
+            json.put("isSuccess", false);
+            json.put("Error", "UNDEFINED_AUTHORITY");
+            json.put("Message", "허가되지 않았습니다.");
+            String newResponse = new ObjectMapper().writeValueAsString(json);
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.setCharacterEncoding("utf-8");
-            MainResponseDTO.ServeletResponse error = new MainResponseDTO.ServeletResponse();
-            error.setIsSuccess(false);
-            error.setMessage("허가되지 않은 접근입니다");
-            String result = objectMapper.writeValueAsString(error);
-            response.getWriter().write(result);
+            response.getOutputStream().write(newResponse.getBytes());
         } catch (RuntimeException e) {
+            LOGGER.info("Filter-Chain에서 오류가 발생했습니다.");
+            json.put("isSuccess", false);
+            json.put("Error", "UNKNOWN_ERROR");
+            json.put("Message", "오류가 발생했습니다");
+            String newResponse = new ObjectMapper().writeValueAsString(json);
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.setContentType("application/json");
             response.setCharacterEncoding("utf-8");
-            MainResponseDTO.ServeletResponse error = new MainResponseDTO.ServeletResponse();
-            error.setIsSuccess(false);
-            error.setMessage("잘못된 요청입니다");
-            String result = objectMapper.writeValueAsString(error);
-            response.getWriter().write(result);
+            response.getOutputStream().write(newResponse.getBytes());
         }
-
     }
 }
