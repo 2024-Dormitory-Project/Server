@@ -35,7 +35,7 @@ public class UserCommandServiceImpl implements UserCommandService {
 
     //    인터페이스에는 없지만, 쓰이는 함수
     private User findUserById(long userId) {
-        return userRepository.findById((long) userId)
+        return userRepository.findById(userId)
                 .orElseThrow();
     }
 
