@@ -244,16 +244,14 @@ public class CustomRepository {
     }
 
 
-    public String deleteSchedule(LocalDate date, Dormitory dormitory) {
-        query.delete(workDate)
+    public long deleteSchedule(LocalDate date, Dormitory dormitory) {
+        return query.delete(workDate)
                 .where(
                         workDate.scheduledStartTime.year().eq(date.getYear())
                                 .and(workDate.scheduledStartTime.month().eq(date.getMonthValue()))
                                 .and(workDate.user.dormitory.eq(dormitory))
                 )
                 .execute();
-        log.info("삭제 성공");
-        return "해당 일 스케줄 삭제 성공";
     }
 
 
@@ -288,6 +286,13 @@ public class CustomRepository {
             workerList.computeIfAbsent(day, k -> new ArrayList<>()).add(name);
         }
         return workerList;
+    }
+
+    public long givePostWorkByUserId(long userId1, long userId2, LocalDate date) {
+        return query.update(postUser.user)
+                .where(postUser.user.userId.eq(userId1).and(postUser.postWorkDate.eq(date)))
+                .set(postUser.user.userId, userId2)
+                .execute();
     }
 
     @Getter

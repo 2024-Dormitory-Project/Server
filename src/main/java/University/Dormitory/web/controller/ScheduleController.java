@@ -20,9 +20,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import static University.Dormitory.domain.QWorkDate.workDate;
 
@@ -62,50 +64,71 @@ public class ScheduleController {
     }
 
     @PostMapping("/scheduleworktime/{type}")
-    public MainResponseDTO.Work saveNewSchedule(@RequestBody List<WorkRequestDTO.worker> saveWork) {
-        for (WorkRequestDTO.worker worker : saveWork) {
-            log.info("근무자 이름들 :{}", worker.getName());
+    public MainResponseDTO.Work saveNewSchedule(@PathVariable("type") String type, @RequestBody List<WorkRequestDTO.worker> saveWork) {
+        if (type.equals("1") || type.equals("2") || type.equals("3")) { //기숙사 조회인 경우
+            for (WorkRequestDTO.worker worker : saveWork) {
+                log.info("근무자 이름들 :{}", worker.getName());
+            }
+            String s = workCommandService.saveNewWork(saveWork);
+            return MainResponseDTO.Work.builder()
+                    .message(s)
+                    .isSuccess(true)
+                    .build();
         }
-        String s = workCommandService.saveNewWork(saveWork);
-        return MainResponseDTO.Work.builder()
-                .message(s)
-                .isSuccess(true)
-                .build();
+        else if(type.equals("post")) {
+            String s = workCommandService.savePostWorkByUserId(saveWork);
+            return MainResponseDTO.Work.builder()
+                    .message(s)
+                    .isSuccess(true)
+                    .build();
+        }
+        else {
+            throw new WrongPathRequestException("인 경로는 존재하지 않습니다", type);
+        }
     }
 
     @DeleteMapping("/scheduleworktime/{type}")
-    MainResponseDTO.Work deleteSchedule(@RequestBody ScheduleRequestDTO.todayWorkersDetailDto info) {
-        Dormitory dormitory = DormitoryConverter.toDormitory(info.getDormitoryNum());
-        LocalDate date = LocalDate.of(info.getYear(), info.getMonth(), info.getDay());
-        log.info("삭제 스케줄의 날짜 : {}", date);
-        String s = workCommandService.delteSchedule(dormitory, date);
-        return MainResponseDTO.Work.builder()
-                .message(s)
-                .isSuccess(true)
-                .build();
+    MainResponseDTO.Work deleteSchedule(@PathVariable("type") String type, @RequestBody ScheduleRequestDTO.todayWorkersDetailDto info) {
+        if (type.equals("1") || type.equals("2") || type.equals("3")) { //기숙사 조회인 경우
+            Dormitory dormitory = DormitoryConverter.toDormitory(info.getDormitoryNum());
+            LocalDate date = LocalDate.of(info.getYear(), info.getMonth(), info.getDay());
+            log.info("삭제 스케줄의 날짜 : {}", date);
+            String s = workCommandService.delteSchedule(dormitory, date);
+            return MainResponseDTO.Work.builder()
+                    .message(s)
+                    .isSuccess(true)
+                    .build();
+        }
+        else if(type.equals("post")) {
+            String s = workCommandService.deletePostWork(LocalDate.of(info.getYear(), info.getMonth(), info.getDay()));
+            return MainResponseDTO.Work.builder()
+                    .message(s)
+                    .isSuccess(true)
+                    .build();
+        }
+        else
+            throw new WrongPathRequestException("인 경로는 존재하지 않습니다", type);
     }
 
     @GetMapping("/actualworktime")
-    List<ScheduleResponseDTO.actualWorkTime> actualWorkTime(@RequestParam("dormitory") int dormitoryNum, @RequestParam("year") int year, @RequestParam("month") int month, @RequestParam("name") String name) {
+    List<ScheduleResponseDTO.actualWorkTime> actualWorkTime(@RequestParam("year") int year, @RequestParam("month") int month, @RequestParam("name") String name) {
         Optional<Long> userIdByName = userCommandService.findUserIdByName(name);
         if (userIdByName.isPresent()) {
             List<Tuple> tuples = workCommandService.actualWorkTime(userIdByName.get(), LocalDate.of(year, month, 1));
             List<ScheduleResponseDTO.actualWorkTime> workerList = new ArrayList<>();
             for (Tuple tuple : tuples) {
-                int actualYear = tuple.get(workDate.actualStartTime).getYear();
+               /* int actualYear = tuple.get(workDate.actualStartTime).getYear();
                 int actualMonth = tuple.get(workDate.actualStartTime).getMonthValue();
                 int actualDay = tuple.get(workDate.actualStartTime).getDayOfMonth();
-//                스케줄 시작 시간으로 가정. 만약 같은 날에 두번 근무가 들어가도 어짜피 스케줄시간으로 따지니까 그냥 이거만 가져와서 return 값에 넣어줌
-//                int scheduleYear = tuple.get(workDate.scheduledStartTime).getYear();
-//                int scheduleMonth = tuple.get(workDate.scheduledStartTime).getMonthValue();
-//                int scheduleDay = tuple.get(workDate.scheduledStartTime).getDayOfMonth();
-
+                스케줄 시작 시간으로 가정. 만약 같은 날에 두번 근무가 들어가도 어짜피 스케줄시간으로 따지니까 그냥 이거만 가져와서 return 값에 넣어줌
+                int scheduleYear = tuple.get(workDate.scheduledStartTime).getYear();
+                int scheduleMonth = tuple.get(workDate.scheduledStartTime).getMonthValue();
+                int scheduleDay = tuple.get(workDate.scheduledStartTime).getDayOfMonth();*/
                 String name2 = tuple.get(workDate.user.name);
-
                 ScheduleResponseDTO.actualWorkTime worker = ScheduleResponseDTO.actualWorkTime.builder()
-                        .date(LocalDate.of(actualYear, actualMonth, actualDay))
-                        .scheduleTime(tuple.get(workDate.scheduledStartTime).toLocalTime())
-                        .actualTime(tuple.get(workDate.scheduledStartTime).toLocalTime())
+                        .date(LocalDate.of(tuple.get(workDate.actualStartTime).getYear(), tuple.get(workDate.actualStartTime).getMonthValue(), tuple.get(workDate.actualStartTime).getDayOfMonth()))
+                        .scheduleTime(tuple.get(workDate.scheduledStartTime))
+                        .actualTime(tuple.get(workDate.scheduledStartTime))
                         .name(name2)
                         .build();
 
