@@ -16,8 +16,8 @@ public class ScheduleResponseDTO {
     @Getter
     public static class actualWorkTime {
         LocalDate date;
-        LocalTime scheduleTime;
-        LocalTime actualTime;
+        LocalDateTime scheduleTime;
+        LocalDateTime actualTime;
         String name;
 
     }
