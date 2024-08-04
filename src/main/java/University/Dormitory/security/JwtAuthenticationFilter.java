@@ -69,7 +69,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     return;
                 } else {
                     LOGGER.info("토큰 유효기간 만료");
-                    json.put("isSuccess", false);
+                    json.put("Success", false);
                     json.put("Error", "INVALID_TOKEN");
                     json.put("Message", "토큰 유효기간이 지났습니다.");
                     String newResponse = new ObjectMapper().writeValueAsString(json);
@@ -82,7 +82,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (AuthenticationException e) {
             LOGGER.info("허가되지 않은 권한이 접근하였습니다");
-            json.put("isSuccess", false);
+            json.put("Success", false);
             json.put("Error", "UNDEFINED_AUTHORITY");
             json.put("Message", "허가되지 않았습니다.");
             String newResponse = new ObjectMapper().writeValueAsString(json);
@@ -92,7 +92,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             response.getOutputStream().write(newResponse.getBytes());
         } catch (RuntimeException e) {
             LOGGER.info("Filter-Chain에서 오류가 발생했습니다.");
-            json.put("isSuccess", false);
+            json.put("Success", false);
             json.put("Error", "UNKNOWN_ERROR");
             json.put("Message", "오류가 발생했습니다");
             String newResponse = new ObjectMapper().writeValueAsString(json);
