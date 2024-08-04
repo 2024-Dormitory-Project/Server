@@ -19,6 +19,6 @@ public class ScheduleResponseDTO {
         LocalDateTime scheduleTime;
         LocalDateTime actualTime;
         String name;
-
+        String Reason;
     }
 }

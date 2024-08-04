@@ -130,6 +130,7 @@ public class ScheduleController {
                         .scheduleTime(tuple.get(workDate.scheduledStartTime))
                         .actualTime(tuple.get(workDate.scheduledStartTime))
                         .name(name2)
+                        .Reason(tuple.get(workDate.Reason))
                         .build();
 
                 workerList.add(worker);

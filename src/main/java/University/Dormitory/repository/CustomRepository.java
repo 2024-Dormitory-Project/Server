@@ -157,7 +157,7 @@ public class CustomRepository {
 //                .fetch();
 //    }아래와동일
     public List<Tuple> findScheduleTimeAndActualTimeByUserId(long userId, LocalDate date) {
-        return query.select(workDate.scheduledStartTime, workDate.actualStartTime, workDate.user.name)
+        return query.select(workDate.scheduledStartTime, workDate.actualStartTime, workDate.user.name, workDate.Reason)
                 .from(workDate)
                 .where(workDate.user.userId.eq(userId)
                         .and(workDate.scheduledStartTime.year().eq(date.getYear()))
