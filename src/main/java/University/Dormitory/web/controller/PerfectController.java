@@ -1,7 +1,9 @@
 package University.Dormitory.web.controller;
 
 import University.Dormitory.Converter.AuthorityConverter;
+import University.Dormitory.Converter.DormitoryConverter;
 import University.Dormitory.domain.Enum.Authority;
+import University.Dormitory.domain.Enum.Dormitory;
 import University.Dormitory.domain.User;
 import University.Dormitory.exception.Handler.UserNotFoundException;
 import University.Dormitory.repository.JPARepository.UserRepository;
@@ -41,7 +43,7 @@ public class PerfectController {
                 build();
     }
 
-    @PostMapping("/signout")
+    @DeleteMapping("/signout")
     public SignOutResponseDTO.SignOutDTO SignOut(@RequestBody @Valid SignOutRequestDTO.SignOutDTO request) {
         log.info("[회원탈퇴 시도], 탈퇴하려는 학번:{}, 탈퇴하려는 이름:{}", request.getUserId(), request.getName());
         if (userCommandService.findUserIdByName(request.getName()).get() != request.getUserId()) {
@@ -55,7 +57,7 @@ public class PerfectController {
                 .build();
     }
 
-    @DeleteMapping("/changeauthority")
+    @PatchMapping("/changeauthority")
     public MainResponseDTO.Work changeauthority(@RequestBody UserRequestDTO.changeUserAuthorityDto info) {
         Optional<Long> userIdByName = userCommandService.findUserIdByName(info.getName());
         if (userIdByName.isPresent()) {
