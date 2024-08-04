@@ -4,6 +4,7 @@ import University.Dormitory.Converter.DormitoryConverter;
 import University.Dormitory.domain.Enum.Dormitory;
 import University.Dormitory.domain.WorkScheduleChange;
 import University.Dormitory.exception.Handler.UserNotFoundException;
+import University.Dormitory.exception.Handler.WrongPathRequestException;
 import University.Dormitory.repository.CustomRepository;
 import University.Dormitory.security.JwtTokenProvider;
 import University.Dormitory.service.DateService.DateCommandService;
@@ -25,6 +26,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @Slf4j
@@ -38,45 +40,73 @@ public class AssistantController {
     private final DateCommandService dateCommandService;
 
 
-    @PatchMapping("/givework")
-    WorkResposneDTO.workResult giveWork(HttpServletRequest request, @RequestBody WorkRequestDTO.giveWorkDto time) {
+    @PatchMapping("/givework/{type}")
+    WorkResposneDTO.workResult giveWork(HttpServletRequest request,
+                                        @PathVariable("type") String type, @RequestBody WorkRequestDTO.giveWorkDto time) {
         String token = request.getHeader("Authorization");
         long userId1 = Long.parseLong(jwtTokenProvider.getUserIdFromAcessToken(token));
-        LocalDateTime changeTime = LocalDateTime.of(
-                Integer.parseInt(time.getYear()), Integer.parseInt(time.getMonth()),
-                Integer.parseInt(time.getDay()), Integer.parseInt(time.getHour()), Integer.parseInt(time.getMin()));
-        String acceptor = time.getUserName();
-        Optional<Long> acceptorUserId = userCommandService.findUserIdByName(acceptor);
-        if (acceptorUserId.isPresent()) {
-            long userId2 = acceptorUserId.get();
-            String s = workCommandService.giveMyWorkByUserIds(userId1, userId2, changeTime);
+        if (type.equals("dormitory")) {
+            LocalDateTime changeTime = LocalDateTime.of(
+                    Integer.parseInt(time.getYear()), Integer.parseInt(time.getMonth()),
+                    Integer.parseInt(time.getDay()), Integer.parseInt(time.getHour()), Integer.parseInt(time.getMin()));
+            String acceptor = time.getUserName();
+            Optional<Long> acceptorUserId = userCommandService.findUserIdByName(acceptor);
+            if (acceptorUserId.isPresent()) {
+                long userId2 = acceptorUserId.get();
+                String s = workCommandService.giveMyWorkByUserIds(userId1, userId2, changeTime);
+                return WorkResposneDTO.workResult.builder()
+                        .message(s)
+                        .isSuccess(true)
+                        .build();
+            } else {
+                throw new UserNotFoundException("해당 학번의 학생을 찾을 수 없습니다");
+            }
+        } else if (type.equals("post")) {
+            String s = workCommandService.givePostWorkByUserId(userId1, userCommandService.findUserIdByName(time.getUserName()).orElseThrow(
+                            () -> new UserNotFoundException("해당 학번의 조교가 존재하지 않습니다")
+                    ),
+                    LocalDate.of(Integer.parseInt(time.getYear()), Integer.parseInt(time.getMonth()), Integer.parseInt(time.getDay())));
             return WorkResposneDTO.workResult.builder()
                     .message(s)
                     .isSuccess(true)
                     .build();
         } else {
-            throw new UserNotFoundException("해당 학번의 학생을 찾을 수 없습니다");
+            throw new WrongPathRequestException("해당 경로는 존재하지 않습니다", type);
         }
     }
 
-    @PatchMapping("/exchangework")
-    WorkResposneDTO.workResult exchangeWork(HttpServletRequest request, @RequestBody WorkRequestDTO.exchangeWorkDto exchange) {
+    @PatchMapping("/exchangework/{type}")
+    WorkResposneDTO.workResult exchangeWork(HttpServletRequest request, @PathVariable("type") String type, @RequestBody WorkRequestDTO.exchangeWorkDto exchange) {
         String token = request.getHeader("Authorization");
         long userId1 = Long.parseLong(jwtTokenProvider.getUserIdFromAcessToken(token));
-
-        LocalDateTime time1 = LocalDateTime.of(
-                exchange.getYear1(), exchange.getMonth1(), exchange.getDay1(), exchange.getHour1(), exchange.getMin1()
-        );
-        LocalDateTime time2 = LocalDateTime.of(
-                exchange.getYear2(), exchange.getMonth2(), exchange.getDay2(), exchange.getHour2(), exchange.getMin2()
-        );
-        Optional<Long> id2 = userCommandService.findUserIdByName(exchange.getUserName2());
-        if (id2.isPresent()) {
-            long userId2 = id2.get();
-            String s = workCommandService.exchangeMyWorkByUserIds(userId1, userId2, time1, time2);
+        if (type.equals("dormitory")) {
+            LocalDateTime time1 = LocalDateTime.of(
+                    exchange.getYear1(), exchange.getMonth1(), exchange.getDay1(), exchange.getHour1(), exchange.getMin1()
+            );
+            LocalDateTime time2 = LocalDateTime.of(
+                    exchange.getYear2(), exchange.getMonth2(), exchange.getDay2(), exchange.getHour2(), exchange.getMin2()
+            );
+            Optional<Long> id2 = userCommandService.findUserIdByName(exchange.getUserName2());
+            if (id2.isPresent()) {
+                long userId2 = id2.get();
+                String s = workCommandService.exchangeMyWorkByUserIds(userId1, userId2, time1, time2);
+                return WorkResposneDTO.workResult.builder().message(s).isSuccess(true).build();
+            } else {
+                throw new UserNotFoundException("해당 학번을 찾을 수 없습니다.");
+            }
+        } else if (type.equals("post")) {
+            String s = workCommandService.exchangePostWorkByUserId(userId1,
+                    LocalDate.of(
+                            exchange.getYear1(), exchange.getMonth1(), exchange.getDay1()),
+                    userCommandService.findUserIdByName(exchange.getUserName2()).orElseThrow(
+                            () -> new UserNotFoundException("해당 이름의 조교가 존재하지 않습니다")
+                    ),
+                    LocalDate.of(
+                            exchange.getYear2(), exchange.getMonth2(), exchange.getDay2()
+                    ));
             return WorkResposneDTO.workResult.builder().message(s).isSuccess(true).build();
         } else {
-            throw new UserNotFoundException("해당 학번을 찾을 수 없습니다.");
+            throw new WrongPathRequestException("인 경로는 존재하지 않습니다", type);
         }
     }
 
@@ -98,7 +128,7 @@ public class AssistantController {
     }
 
     @GetMapping("/schedule/people")
-    HashMap<Integer, HashMap<String, List<LocalTime>>> todayWorkersDetail(
+    Map<Integer, ConcurrentHashMap<String, List<LocalTime>>> todayWorkersDetail(
             @RequestParam("dormitoryNum") int dormitoryNum,
             @RequestParam("month") int month,
             @RequestParam("year") int year,
@@ -106,7 +136,7 @@ public class AssistantController {
     ) {
         Dormitory dormitory = DormitoryConverter.toDormitory(dormitoryNum);
         MultiValueMap<String, CustomRepository.WorkTime> stringWorkTimeMultiValueMap = dormitoryCommandService.viewDormitoryWorkers(LocalDate.of(year, month, day), dormitory);
-        HashMap<Integer, HashMap<String, List<LocalTime>>> result = new HashMap<>();
+        Map<Integer, ConcurrentHashMap<String, List<LocalTime>>> result = new ConcurrentHashMap<>();
         int i = 0;
 
         for (Map.Entry<String, List<CustomRepository.WorkTime>> entry : stringWorkTimeMultiValueMap.entrySet()) {
@@ -121,7 +151,7 @@ public class AssistantController {
                 time.add(end);
             }
 
-            HashMap<String, List<LocalTime>> nameAndTime = new HashMap<>();
+            ConcurrentHashMap<String, List<LocalTime>> nameAndTime = new ConcurrentHashMap<>();
             nameAndTime.put(name, time);
             result.put(i, nameAndTime);
             i++;
@@ -192,6 +222,21 @@ public class AssistantController {
                 Integer.parseInt(workday.getActualMin())
         );
         String s = workCommandService.startWork(userId, scheduleTime, actualTime);
+        return MainResponseDTO.Work.builder()
+                .isSuccess(true)
+                .message(s)
+                .build();
+    }
+
+    /*테스트 아직 안됨*/
+    @PostMapping("/main/work/late")
+    MainResponseDTO.Work lateReason(HttpServletRequest request,
+                                    @RequestBody Map<String, String> data) {
+        String reason = data.get("reason");
+        String time = data.get("time");
+        log.info("사유 : {}, 시간 : {}", reason, time);
+        long userId = Long.parseLong(jwtTokenProvider.getUserIdFromAcessToken(request.getHeader("Authorization")));
+        String s = workCommandService.writeReasonByUserId(userId, reason, time);
         return MainResponseDTO.Work.builder()
                 .isSuccess(true)
                 .message(s)
