@@ -72,14 +72,6 @@ public interface WorkCommandService {
      */
     String changeActualTimeByUserId(long userId, LocalDateTime beforeActualTime, LocalDateTime afterActualTime);
 
-    /**
-     * 처음 스케줄 짤 때 출/퇴근 넣기. 한번에 여러개일 경우 해당 함수 반복문 처리하면 될 것으로 예상.
-     *
-     * @param userId 학번
-     * @param startTime 근무 시작 시간
-     * @param leaveTime 근무 종료 시간
-     */
-
 
     /**
      *처음 우편근무일 넣을 때.
@@ -88,8 +80,9 @@ public interface WorkCommandService {
      * @param date 우편근무일
      */
 //    우편 근무 날짜 넣기 기능
-    String postWorkByUserId(long userId, LocalDate date);
+    String savePostWorkByUserId(List<WorkRequestDTO.worker> saveWork);
 
+    String givePostWorkByUserId(long userId1,long userId2, LocalDate date);
 
     /**
      * 우편근무자끼리 근무일 변경할 때
@@ -127,6 +120,12 @@ public interface WorkCommandService {
 
     /**
      * 원래 controller에서 구현했으나 transaction 오류 통채로 서비스 구간으로 이동
+     * 근무 저장하는 함수
      */
     String saveNewWork(List<WorkRequestDTO.worker> workerList);
+
+    /**
+     * 우편근무 삭제
+     */
+    String deletePostWork(LocalDate date);
 }
