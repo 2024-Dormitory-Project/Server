@@ -26,7 +26,7 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew clean build -x test
-        shell: bash# (7).build시작
+        shell: bash # (7).build시작
 
       - name: Get current time
         uses: 1466587594/get-current-time@v2
@@ -37,7 +37,7 @@ jobs:
 
       - name: Show Current Time
         run: echo "CurrentTime=$"
-        shell: bash# (9).확보한 시간 보여주기
+        shell: bash # (9).확보한 시간 보여주기
 
       - name: Generate deployment package
         run: |
