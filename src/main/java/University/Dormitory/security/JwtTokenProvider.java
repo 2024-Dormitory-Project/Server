@@ -90,13 +90,13 @@ public class JwtTokenProvider {
 
     public String getUserIdFromAcessToken(String token) {
         LOGGER.info("로그인 추출");
-        LOGGER.info("[getUserId] 토큰 기반 회원 구별 정보 추출");
         if (StringUtils.hasText(token) && token.startsWith("Bearer ")) {
             token =  token.substring(7);
         }
         String info = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
-
+        String authority = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().get("Authority", String.class);
         LOGGER.info("[getUserId] 토큰 기반 회원 구별 정보 추출 완료, ID:{}", info);
+        LOGGER.info("[getUserId] 토큰 기반 회원 구별 정보 추출 완료, Authority:{}", authority);
         return info;
     }
 

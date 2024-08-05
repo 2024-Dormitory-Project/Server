@@ -51,7 +51,7 @@ public class SecurityConfig{
                         configurer.accessDeniedPage("/access-denied") // 권한 없을 시 접근할 페이지
                 )
                 .csrf().disable()
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userRepository), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

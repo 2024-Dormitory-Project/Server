@@ -13,5 +13,5 @@ public interface DormitoryCommandService {
     MultiValueMap<String, CustomRepository.WorkTime> viewDormitoryWorkers(LocalDate date, Dormitory dormitory);
 
     //    우편근무자 보기
-    String viewPostWorker(LocalDate date);
+    Map<Integer, List<String>> viewPostWorker(LocalDate date);
 }

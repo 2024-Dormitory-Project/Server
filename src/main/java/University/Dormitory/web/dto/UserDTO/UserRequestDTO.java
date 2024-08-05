@@ -9,7 +9,6 @@ public class UserRequestDTO {
         long studentNumber;
         String authority;
         String name;
-        int dormitoryNum;
     }
 
     @Getter

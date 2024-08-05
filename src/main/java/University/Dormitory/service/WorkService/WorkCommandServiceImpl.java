@@ -13,7 +13,6 @@ import University.Dormitory.repository.JPARepository.PostUserRepository;
 import University.Dormitory.repository.JPARepository.UserRepository;
 import University.Dormitory.repository.JPARepository.WorkDateRepository;
 import University.Dormitory.repository.JPARepository.WorkScheduleChangeRepository;
-import University.Dormitory.service.UserService.UserCommandService;
 import University.Dormitory.web.dto.WorkDTO.WorkRequestDTO;
 import com.querydsl.core.Tuple;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static University.Dormitory.domain.QWorkDate.workDate;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -39,7 +40,6 @@ public class WorkCommandServiceImpl implements WorkCommandService {
     private final PostUserRepository postUserRepository;
     private final UserRepository userRepository;
     private final WorkScheduleChangeRepository workScheduleChangeRepository;
-    private final UserCommandService userCommandService;
 
     @Override
     public String changeOrSaveScheduleTimeByUserId(long userId,
@@ -178,13 +178,19 @@ public class WorkCommandServiceImpl implements WorkCommandService {
     }
 
     @Override
-    public String writeReasonByUserId(long userId, String reason, LocalDateTime date) {
+    public String writeReasonByUserId(long userId, String reason, String time) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        LocalDateTime date = LocalDateTime.parse(time, formatter);
+        log.info("사유 : {}, 시간 : {}", reason, date);
         int length = reason.length();
         if (length > 254) {
             throw new TooLongException("글자 수가 너무 많습니다. 관리자에게 문의하거나 길이를 줄여주세요");
         }
         try {
             long l = customRepository.writeReason(userId, reason, date);
+            if (l == 0) {
+                throw new BadDateRequestException("일치하는 날짜가 없습니다. 출근했던 시간을 다시 주세요");
+            }
         } catch (Exception e) {
             throw new RuntimeException("사유 작성 저장 도중 에러가 발생했습니다. 관리자에게 문의해주세요" + e.getMessage());
         }
@@ -208,17 +214,33 @@ public class WorkCommandServiceImpl implements WorkCommandService {
     }
 
     @Override
-    public String postWorkByUserId(long userId, LocalDate date) {
-        PostUser postUser = PostUser.builder()
-                .postWorkDate(date)
-                .user(userRepository.findById((long) userId).orElseThrow(() -> new UserNotFoundException("해당 학번은 존재하지 않습니다.")))
-                .build();
+    public String savePostWorkByUserId(List<WorkRequestDTO.worker> saveWork) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         try {
-            postUserRepository.save(postUser);
+            for (WorkRequestDTO.worker worker : saveWork) {
+                LocalDate date = LocalDate.parse(worker.getTimes().get(0), formatter);
+                PostUser postUser = PostUser.builder()
+                        .postWorkDate(date)
+                        .user(userRepository.findById(customRepository.findUserIdByName(worker.getName()).orElseThrow(
+                                () -> new UserNotFoundException("해당 이름의 조교가 존재하지 않습니다.")
+                        )).orElseThrow(
+                                () -> new UserNotFoundException("해당 학번이 존재하지 않습니다")
+                        ))
+                        .build();
+                postUserRepository.save(postUser);
+            }
         } catch (Exception e) {
             throw new RuntimeException("우편 근무 저장 중 오류가 발생했습니다. 관리자에게 문의하세요" + e.getMessage());
         }
-        return "성공적으로 저장되었습니다";
+        return "우편 근무 저장 완료";
+    }
+
+    @Override
+    public String givePostWorkByUserId(long userId1, long userId2, LocalDate date) {
+        long l = customRepository.givePostWorkByUserId(userId1, userId2, date);
+        if (l != 1) {
+            throw new RuntimeException("우편근무 맞교대 중 오류가 발생했습니다.");
+        } else return "우편 맞교대 완료";
     }
 
     @Override
@@ -261,7 +283,7 @@ public class WorkCommandServiceImpl implements WorkCommandService {
         } catch (Exception e) {
             throw new RuntimeException("PostUser 근무교환 저장 중 오류 발생" + e.getMessage());
         }
-        return "우편근무교체가 완료되었습니다.";
+        return "우편근무교환 완료.";
     }
 
     @Override
@@ -274,12 +296,21 @@ public class WorkCommandServiceImpl implements WorkCommandService {
     @Override
     public String delteSchedule(Dormitory dormitory, LocalDate date) {
         log.info("스케줄 삭제, 받은 기숙사와 날짜: {}, {}", dormitory, date);
-        return customRepository.deleteSchedule(date, dormitory);
+        long l = customRepository.deleteSchedule(date, dormitory);
+        if (l != 1) {
+            throw new RuntimeException("스케줄 삭제 중 에러가 발생했습니다.");
+        }
+        return "스케줄 삭제 완료";
     }
 
     @Override
     public List<Tuple> actualWorkTime(long userId, LocalDate date) {
-        return customRepository.findScheduleTimeAndActualTimeByUserId(userId, date);
+        List<Tuple> scheduleTimeAndActualTimeByUserId = customRepository.findScheduleTimeAndActualTimeByUserId(userId, date);
+        scheduleTimeAndActualTimeByUserId.removeIf(
+                tuple -> tuple.get(workDate.actualStartTime) == null ||
+                        tuple.get(workDate.scheduledStartTime) == null ||
+                        tuple.get(workDate.user.name) == null);
+        return scheduleTimeAndActualTimeByUserId;
     }
 
     @Override
@@ -323,6 +354,15 @@ public class WorkCommandServiceImpl implements WorkCommandService {
             }
         }
         return "스케줄 저장/수정 완료";
+    }
+
+    @Override
+    public String deletePostWork(LocalDate date) {
+        long l = postUserRepository.deleteByPostWorkDate(date);
+        if (l != 1) {
+            throw new RuntimeException("스케줄 삭제 도중 에러가 발생했습니다.");
+        }
+        return "스케줄 삭제 완료";
     }
 }
 

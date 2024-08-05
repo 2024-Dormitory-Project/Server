@@ -26,12 +26,4 @@ public class MainResponseDTO {
         Boolean isSuccess;
         String message;
     }
-
-    @JsonDeserialize(builder = ServeletResponse.class)
-    @Setter
-    @Getter
-    public static class ServeletResponse {
-        Boolean isSuccess;
-        String message;
-    }
 }

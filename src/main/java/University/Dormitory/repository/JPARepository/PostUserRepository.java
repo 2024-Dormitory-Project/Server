@@ -11,4 +11,5 @@ public interface PostUserRepository extends JpaRepository<PostUser, Long> {
     @Query("SELECT p FROM PostUser p WHERE p.user.userId = :userId AND p.postWorkDate = :postWorkDate")
     Optional<PostUser> findByUserIdAndPostWorkDate(Long userId, LocalDate postWorkDate);
 
+    long deleteByPostWorkDate(LocalDate date);
 }
