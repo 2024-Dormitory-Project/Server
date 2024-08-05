@@ -96,6 +96,7 @@ public class BaseController {
             throw new RefreshTokenInvalidException("Refresh 토큰의 기한이 만료되었습니다");
         }
     }
+
     @GetMapping("/health")
     public String healthCheck() {
         return "I'm healthy!";
