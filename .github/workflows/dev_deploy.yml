@@ -35,7 +35,7 @@ jobs:
           echo "spring.jpa.properties.hibernate.show_sql=true" >> src/main/resources/application.properties
           echo "spring.jpa.properties.hibernate.format_sql=true" >> src/main/resources.application.properties
           echo "spring.jpa.properties.hibernate.use_sql_comments=true" >> src/main/resources/application.properties
-          echo "spring.jpa.hibernate.ddl-auto=update" >> src/main/resources/application.properties
+          echo "spring.jpa.hibernate.ddl-auto=create" >> src/main/resources/application.properties
           echo "logging.level.root=TRACE" >> src/main/resources/application.properties
         shell: bash
 
