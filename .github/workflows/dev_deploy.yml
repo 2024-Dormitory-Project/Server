@@ -24,6 +24,21 @@ jobs:
         run: chmod +x ./gradlew
         shell: bash
 
+      - name: Create application.properties
+        run: |
+          mkdir -p src/main/resources
+          echo "spring.datasource.url=${{ secrets.SPRING_DATASOURCE_URL }}" > src/main/resources/application.properties
+          echo "spring.datasource.username=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> src/main/resources/application.properties
+          echo "spring.datasource.password=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> src/main/resources/application.properties
+          echo "jwt.secret=${{ secrets.JWT_SECRET }}" >> src/main/resources/application.properties
+          echo "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect" >> src/main/resources/application.properties
+          echo "spring.jpa.properties.hibernate.show_sql=true" >> src/main/resources/application.properties
+          echo "spring.jpa.properties.hibernate.format_sql=true" >> src/main/resources.application.properties
+          echo "spring.jpa.properties.hibernate.use_sql_comments=true" >> src/main/resources/application.properties
+          echo "spring.jpa.hibernate.ddl-auto=update" >> src/main/resources/application.properties
+          echo "logging.level.root=TRACE" >> src/main/resources/application.properties
+        shell: bash
+
       - name: Build with Gradle
         run: ./gradlew clean build -x test
         shell: bash

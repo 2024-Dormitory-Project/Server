@@ -35,13 +35,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 path.startsWith("/swagger-resources/") ||
                 path.startsWith("/webjars/") ||
                 path.startsWith("/swagger-ui.html") ||
+                path.startsWith("/health") ||
                 "/".equals(path) ||
                 "/signin".equals(path) ||
                 "/favicon.ico".equals(path)
-//              Swagger 세팅을 위해 잠깐 풀어둠
-                ||
-                path.startsWith("/perfect")
-
         ) {
             filterChain.doFilter(request, response);
             return;
