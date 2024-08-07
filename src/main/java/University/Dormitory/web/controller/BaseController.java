@@ -11,6 +11,7 @@ import University.Dormitory.web.dto.SignInDTO.SignInRequestDTO;
 import University.Dormitory.web.dto.SignInDTO.SignInResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.Map;
 
 @RestController
@@ -32,8 +34,9 @@ public class BaseController {
     private final UserRepository userRepository;
 
     @GetMapping("/")
-    public String redirect() {
-        return "redirect:/login/signIn";
+    public void redirect(HttpServletResponse response) throws IOException {
+        String redirect_uri="https://www.gc-dormitory.shop/signin";
+        response.sendRedirect(redirect_uri);
     }
 
     @PostMapping("/signin")
