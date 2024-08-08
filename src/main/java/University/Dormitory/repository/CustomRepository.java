@@ -281,7 +281,7 @@ public class CustomRepository {
         for (Tuple tuple : fetch) {
             Integer day = tuple.get(postUser.postWorkDate.dayOfMonth());
             String name = tuple.get(postUser.user.name);
-
+            log.info("day : {}, name : {}" , day, name);
             // 날짜가 존재하지 않으면 새로운 리스트를 생성하고 추가
             workerList.computeIfAbsent(day, k -> new ArrayList<>()).add(name);
         }
