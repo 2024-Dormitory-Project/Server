@@ -82,6 +82,7 @@ public class PerfectController {
         );
         User byId = userRepository.findById(userId).orElseThrow();
         return UserResponseDTO.userinfo.builder()
+                .userId(byId.getUserId())
                 .authority(byId.getAuthority())
                 .dormitory(byId.getDormitory())
                 .build();
