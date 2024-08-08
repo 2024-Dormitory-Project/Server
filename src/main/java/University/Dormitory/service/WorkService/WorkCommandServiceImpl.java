@@ -294,13 +294,19 @@ public class WorkCommandServiceImpl implements WorkCommandService {
 
     //    스케줄 삭제
     @Override
-    public String delteSchedule(Dormitory dormitory, LocalDate date) {
+    public String deleteSchedule(Dormitory dormitory, LocalDate date) {
+        String dorm = null;
         log.info("스케줄 삭제, 받은 기숙사와 날짜: {}, {}", dormitory, date);
         long l = customRepository.deleteSchedule(date, dormitory);
-        if (l != 1) {
-            throw new RuntimeException("스케줄 삭제 중 에러가 발생했습니다.");
+        if (l == 0) {
+            return ("해당 기숙사의 해당 근무날에는 이미 근무가 없습니다. 0개 근무 삭제");
         }
-        return "스케줄 삭제 완료";
+        switch (dormitory) {
+            case DORMITORY1 -> dorm = "1기숙사";
+            case DORMITORY2 -> dorm = "2기숙사";
+            case DORMITORY3 -> dorm = "3기숙사";
+        }
+        return dorm + "의 " + date + "날짜 스케줄 삭제 완료(삭제 근무 개수: " + l + ")";
     }
 
     @Override
@@ -359,10 +365,10 @@ public class WorkCommandServiceImpl implements WorkCommandService {
     @Override
     public String deletePostWork(LocalDate date) {
         long l = postUserRepository.deleteByPostWorkDate(date);
-        if (l != 1) {
-            throw new RuntimeException("스케줄 삭제 도중 에러가 발생했습니다.");
+        if (l ==0) {
+            return "해당 날에는 근무가 없습니다. 0개 우편근무 삭제";
         }
-        return "스케줄 삭제 완료";
+        return "우편근무 삭제 완료, 삭제된 근무 개수:" + l;
     }
 }
 

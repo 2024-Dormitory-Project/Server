@@ -249,6 +249,7 @@ public class CustomRepository {
                 .where(
                         workDate.scheduledStartTime.year().eq(date.getYear())
                                 .and(workDate.scheduledStartTime.month().eq(date.getMonthValue()))
+                                .and(workDate.scheduledStartTime.dayOfMonth().eq(date.getDayOfMonth()))
                                 .and(workDate.user.dormitory.eq(dormitory))
                 )
                 .execute();

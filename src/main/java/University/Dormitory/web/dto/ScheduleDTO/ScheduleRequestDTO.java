@@ -7,7 +7,6 @@ import lombok.Getter;
 public class ScheduleRequestDTO {
     @Getter
     public static class todayWorkersDetailDto {
-        int dormitoryNum;
         int month;
         int year;
         int day;

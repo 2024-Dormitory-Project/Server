@@ -108,7 +108,7 @@ public interface WorkCommandService {
      * @param date
      * @return
      */
-    String delteSchedule(Dormitory dormitory,LocalDate date);
+    String deleteSchedule(Dormitory dormitory,LocalDate date);
 
     /**
      * 실제 출근시간 및 스케줄 시간 가져오기

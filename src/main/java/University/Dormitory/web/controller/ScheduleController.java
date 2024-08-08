@@ -90,10 +90,10 @@ public class ScheduleController {
     @DeleteMapping("/scheduleworktime/{type}")
     MainResponseDTO.Work deleteSchedule(@PathVariable("type") String type, @RequestBody ScheduleRequestDTO.todayWorkersDetailDto info) {
         if (type.equals("1") || type.equals("2") || type.equals("3")) { //기숙사 조회인 경우
-            Dormitory dormitory = DormitoryConverter.toDormitory(info.getDormitoryNum());
+            Dormitory dormitory = DormitoryConverter.toDormitory(Integer.parseInt(type));
             LocalDate date = LocalDate.of(info.getYear(), info.getMonth(), info.getDay());
             log.info("삭제 스케줄의 날짜 : {}", date);
-            String s = workCommandService.delteSchedule(dormitory, date);
+            String s = workCommandService.deleteSchedule(dormitory, date);
             return MainResponseDTO.Work.builder()
                     .message(s)
                     .isSuccess(true)

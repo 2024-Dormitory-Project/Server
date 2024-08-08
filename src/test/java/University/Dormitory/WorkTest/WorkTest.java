@@ -93,7 +93,7 @@ public class WorkTest {
         LocalDateTime endTime2 = LocalDateTime.parse(wantLeaveTime1, formatter);
         workCommandService.changeOrSaveScheduleTimeByUserId(202035505, null, startTime1, endTime2);
 
-        workCommandService.delteSchedule(Dormitory.DORMITORY2, LocalDate.from(startTime1));
+        workCommandService.deleteSchedule(Dormitory.DORMITORY2, LocalDate.from(startTime1));
         LocalDate deleteTime = LocalDate.of(startTime1.getYear(), startTime1.getMonth(), startTime1.getDayOfMonth());
         customRepository.findDormitoryWorkersNameByDateAndDormitory(deleteTime, Dormitory.DORMITORY2);
         //아무것도 안떠야 정상
@@ -136,5 +136,20 @@ public class WorkTest {
             log.info("키값:{}", integerListEntry.getKey());
             log.info("이름: {}", integerListEntry.getValue());
         }
+    }
+
+    @Test
+    @DisplayName("스케줄 삭제 - 우편 근무")
+    void deletePostWork() {
+        String s = workCommandService.deletePostWork(LocalDate.of(2023, 4, 18));
+        log.info("결과 : {}", s);
+    }
+
+
+    @Test
+    @DisplayName("스케줄 삭제 - 조교 근무")
+    void deleteWork() {
+        String s = workCommandService.deleteSchedule(Dormitory.DORMITORY2, LocalDate.of(2024, 4, 20));
+        log.info("결과 : {}", s);
     }
 }
