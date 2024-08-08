@@ -274,6 +274,7 @@ public class CustomRepository {
 
     public Map<Integer, List<String>> postworkes(LocalDate date) {
         List<Tuple> fetch = query.select(postUser.user.name, postUser.postWorkDate.dayOfMonth())
+                .from(postUser)
                 .where(postUser.postWorkDate.year().eq(date.getYear())
                         .and(postUser.postWorkDate.month().eq(date.getMonthValue())))
                 .fetch();

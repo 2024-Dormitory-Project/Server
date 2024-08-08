@@ -1,13 +1,12 @@
 package University.Dormitory.WorkTest;
 
 import University.Dormitory.domain.Enum.Dormitory;
-import University.Dormitory.domain.User;
 import University.Dormitory.repository.CustomRepository;
 import University.Dormitory.repository.JPARepository.UserRepository;
+import University.Dormitory.service.DormitoryService.DormitoryCommandService;
 import University.Dormitory.service.UserService.UserCommandService;
 import University.Dormitory.service.WorkService.WorkCommandService;
-import University.Dormitory.web.controller.BaseController;
-import University.Dormitory.web.dto.SignUpDTO.SignUpRequestDTO;
+import University.Dormitory.web.controller.ScheduleController;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.MultiValueMap;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -35,6 +33,11 @@ public class WorkTest {
     WorkCommandService workCommandService;
     @Autowired
     CustomRepository customRepository;
+    @Autowired
+    ScheduleController scheduleController;
+    @Autowired
+    DormitoryCommandService dormitoryCommandService;
+
 
     String schedulestartTime1 = "2023-04-18 10:30";
     String schedulestartTime2 = "2023-04-18 18:30";
@@ -46,9 +49,9 @@ public class WorkTest {
 
     @BeforeEach
     void beforeEach() {
-        User user1 = userCommandService.SignUp(SignUpRequestDTO.SignUpDto.builder().userId(202035505).name("권하림").authority("사감").dormitory(Dormitory.DORMITORY2).build());
-        User user2 = userCommandService.SignUp(SignUpRequestDTO.SignUpDto.builder().userId(202035506).name("조혜원").authority("사감").dormitory(Dormitory.DORMITORY2).build());
-        User user3 = userCommandService.SignUp(SignUpRequestDTO.SignUpDto.builder().userId(202035507).name("강지원").authority("조교").dormitory(Dormitory.DORMITORY2).build());
+//        User user1 = userCommandService.SignUp(SignUpRequestDTO.SignUpDto.builder().userId(202035505).name("권하림").authority("사감").dormitory(Dormitory.DORMITORY2).build());
+//        User user2 = userCommandService.SignUp(SignUpRequestDTO.SignUpDto.builder().userId(202035506).name("조혜원").authority("사감").dormitory(Dormitory.DORMITORY2).build());
+//        User user3 = userCommandService.SignUp(SignUpRequestDTO.SignUpDto.builder().userId(202035507).name("강지원").authority("조교").dormitory(Dormitory.DORMITORY2).build());
         log.info("테스트 코드 - 유저 2명 저장 완료");
     }
 
@@ -125,5 +128,13 @@ public class WorkTest {
         customRepository.findDormitoryWorkersNameByDateAndDormitory(date, Dormitory.DORMITORY2);
     }
 
-
+    @Test
+    @DisplayName("우편 근무 버그")
+    void postworkUser() {
+        Map<Integer, List<String>> post = scheduleController.scheduleWorkTime("post", 2023, 4);
+        for (Map.Entry<Integer, List<String>> integerListEntry : post.entrySet()) {
+            log.info("키값:{}", integerListEntry.getKey());
+            log.info("이름: {}", integerListEntry.getValue());
+        }
+    }
 }

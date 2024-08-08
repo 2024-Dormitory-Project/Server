@@ -38,7 +38,7 @@ public class ScheduleController {
     private final DormitoryCommandService dormitoryCommandService;
 
     @GetMapping("/scheduleworktime/{type}")
-    Map<Integer, List<String>> scheduleWorkTime(@PathVariable("type") String type,
+    public Map<Integer, List<String>> scheduleWorkTime(@PathVariable("type") String type,
                                                               @RequestParam("year") int year, @RequestParam("month") int month) {
         if (type.equals("1") || type.equals("2") || type.equals("3")) { //기숙사 조회인 경우
             int dormitoryNum = Integer.parseInt(type);
