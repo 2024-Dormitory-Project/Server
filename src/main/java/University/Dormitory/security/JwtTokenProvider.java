@@ -47,7 +47,7 @@ public class JwtTokenProvider {
         claims.put("dormitory", dormitory);
         claims.put("Name", userName);
         Date now = new Date();
-        long tokenValidMillsecond = 1000L * 60 * 60; //1시간
+        long tokenValidMillsecond = 1000L * 60 * 60 * 24; //24시간
         String token = Jwts.builder().setClaims(claims).setIssuedAt(now).setExpiration(new Date(now.getTime() + tokenValidMillsecond))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
@@ -61,7 +61,7 @@ public class JwtTokenProvider {
         Claims claims = Jwts.claims().setSubject(userId);
         claims.put("Authority", authority);
         Date now = new Date();
-        long tokenValidMillsecond = 1000L * 60 * 60 * 24 * 90; //세달
+        long tokenValidMillsecond = 1000L * 60 * 60 * 24 * 30; //한달
         String token = Jwts.builder().setClaims(claims).setIssuedAt(now).setExpiration(new Date(now.getTime() + tokenValidMillsecond))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
