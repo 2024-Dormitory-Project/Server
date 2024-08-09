@@ -13,6 +13,7 @@ import University.Dormitory.web.dto.ScheduleDTO.ScheduleRequestDTO;
 import University.Dormitory.web.dto.ScheduleDTO.ScheduleResponseDTO;
 import University.Dormitory.web.dto.WorkDTO.WorkRequestDTO;
 import com.querydsl.core.Tuple;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.MultiValueMap;
@@ -20,11 +21,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import static University.Dormitory.domain.QWorkDate.workDate;
 
@@ -38,8 +37,14 @@ public class ScheduleController {
     private final DormitoryCommandService dormitoryCommandService;
 
     @GetMapping("/scheduleworktime/{type}")
+    @Operation(
+            summary = "달력 스케줄 조회",
+            description = "assistant/schedule/{type} API와 똑같이 작동함" +
+                    "같은 이름이 있어도 반환가능하고 스케줄 시작시간에 따라 정렬한 결과를 return함." +
+                    "한마디로 그냥 날짜-이름 그대로 표시하면 된다는 뜻, 시간 정렬은 내가 이미 함"
+    )
     public Map<Integer, List<String>> scheduleWorkTime(@PathVariable("type") String type,
-                                                              @RequestParam("year") int year, @RequestParam("month") int month) {
+                                                       @RequestParam("year") int year, @RequestParam("month") int month) {
         if (type.equals("1") || type.equals("2") || type.equals("3")) { //기숙사 조회인 경우
             int dormitoryNum = Integer.parseInt(type);
             Dormitory dormitory = DormitoryConverter.toDormitory(dormitoryNum);
@@ -50,7 +55,13 @@ public class ScheduleController {
                 if (stringListMap.isEmpty()) {
                     result.put(i, new ArrayList<>());
                 } else {
-                    List<String> names = new ArrayList<>(stringListMap.keySet());
+                    List<String> names = stringListMap.entrySet().stream()
+                            .flatMap(entry -> entry.getValue().stream()
+                                    .map(workTime -> new AbstractMap.SimpleEntry<>(entry.getKey(), workTime)))
+                            .sorted((e2, e1) -> e2.getValue().getStartTime().compareTo(e1.getValue().getStartTime()))
+                            .map(e -> e.getKey())
+                            .collect(Collectors.toList());
+
                     result.put(i, names);
                 }
             }
@@ -74,15 +85,13 @@ public class ScheduleController {
                     .message(s)
                     .isSuccess(true)
                     .build();
-        }
-        else if(type.equals("post")) {
+        } else if (type.equals("post")) {
             String s = workCommandService.savePostWorkByUserId(saveWork);
             return MainResponseDTO.Work.builder()
                     .message(s)
                     .isSuccess(true)
                     .build();
-        }
-        else {
+        } else {
             throw new WrongPathRequestException("인 경로는 존재하지 않습니다", type);
         }
     }
@@ -98,15 +107,13 @@ public class ScheduleController {
                     .message(s)
                     .isSuccess(true)
                     .build();
-        }
-        else if(type.equals("post")) {
+        } else if (type.equals("post")) {
             String s = workCommandService.deletePostWork(LocalDate.of(info.getYear(), info.getMonth(), info.getDay()));
             return MainResponseDTO.Work.builder()
                     .message(s)
                     .isSuccess(true)
                     .build();
-        }
-        else
+        } else
             throw new WrongPathRequestException("인 경로는 존재하지 않습니다", type);
     }
 

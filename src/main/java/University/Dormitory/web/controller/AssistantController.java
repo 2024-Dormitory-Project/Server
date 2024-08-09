@@ -16,6 +16,7 @@ import University.Dormitory.web.dto.MainPageDTO.MainResponseDTO;
 import University.Dormitory.web.dto.WorkDTO.WorkRequestDTO;
 import University.Dormitory.web.dto.WorkDTO.WorkResposneDTO;
 import University.Dormitory.web.dto.WorkDateDTO.WorkDateResponseDTO;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @RestController
 @Slf4j
@@ -110,25 +112,46 @@ public class AssistantController {
         }
     }
 
-    @GetMapping("/schedule")
-    HashMap<Integer, List<String>> todayWorkersName(HttpServletRequest request,
-                                                    @RequestParam("dormitoryNum") int dormitoryNum,
-                                                    @RequestParam("month") int month,
-                                                    @RequestParam("year") int year) {
-        Dormitory dormitory = DormitoryConverter.toDormitory(dormitoryNum);
-        HashMap<Integer, List<String>> result = new HashMap<>();
-        for (int i = 1; i <= LocalDate.of(year, month, 1).lengthOfMonth(); i++) {
-            LocalDate date = LocalDate.of(year, month, i);
-            MultiValueMap<String, CustomRepository.WorkTime> stringListMap = dormitoryCommandService.viewDormitoryWorkers(date, dormitory);
-            List<String> names = new ArrayList<>(stringListMap.keySet());
-            names.addAll(stringListMap.keySet());
-            result.put(i, names);
+    @GetMapping("/schedule/{type}")
+    @Operation(
+            summary = "달력 스케줄 조회",
+            description = "/schedule/scheduleworktime/{type}과 똑같이 작동함" +
+                    "같은 이름이 있어도 반환가능하고 스케줄 시작시간에 따라 정렬한 결과를 return함." +
+                    "한마디로 그냥 날짜-이름 그대로 표시하면 된다는 뜻, 시간 정렬은 이미 함"
+    )
+    public Map<Integer, List<String>> scheduleWorkTime(@PathVariable("type") String type,
+                                                       @RequestParam("year") int year, @RequestParam("month") int month) {
+        if (type.equals("1") || type.equals("2") || type.equals("3")) { //기숙사 조회인 경우
+            int dormitoryNum = Integer.parseInt(type);
+            Dormitory dormitory = DormitoryConverter.toDormitory(dormitoryNum);
+            Map<Integer, List<String>> result = new ConcurrentHashMap<>();
+            for (int i = 1; i <= LocalDate.of(year, month, 1).lengthOfMonth(); i++) {
+                LocalDate date = LocalDate.of(year, month, i);
+                MultiValueMap<String, CustomRepository.WorkTime> stringListMap = dormitoryCommandService.viewDormitoryWorkers(date, dormitory);
+                if (stringListMap.isEmpty()) {
+                    result.put(i, new ArrayList<>());
+                } else {
+                    List<String> names = stringListMap.entrySet().stream()
+                            .flatMap(entry -> entry.getValue().stream()
+                                    .map(workTime -> new AbstractMap.SimpleEntry<>(entry.getKey(), workTime)))
+                            .sorted((e2, e1) -> e2.getValue().getStartTime().compareTo(e1.getValue().getStartTime()))
+                            .map(e -> e.getKey())
+                            .collect(Collectors.toList());
+
+                    result.put(i, names);
+                }
+            }
+            return result;
+        } else if (type.equals("post")) { //우편근무 조회인 경우
+            LocalDate date = LocalDate.of(year, month, 1);
+            return dormitoryCommandService.viewPostWorker(date);
+        } else { //type에 이상한 값이 들어간 경우
+            throw new WrongPathRequestException("인 경로는 존재하지 않습니다", type);
         }
-        return result;
     }
 
     @GetMapping("/schedule/people")
-    Map<Integer, ConcurrentHashMap<String, List<LocalTime>>> todayWorkersDetail(
+    public Map<Integer, ConcurrentHashMap<String, List<LocalTime>>> todayWorkersDetail(
             @RequestParam("dormitoryNum") int dormitoryNum,
             @RequestParam("month") int month,
             @RequestParam("year") int year,

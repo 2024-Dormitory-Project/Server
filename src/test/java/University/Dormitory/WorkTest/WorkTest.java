@@ -6,6 +6,7 @@ import University.Dormitory.repository.JPARepository.UserRepository;
 import University.Dormitory.service.DormitoryService.DormitoryCommandService;
 import University.Dormitory.service.UserService.UserCommandService;
 import University.Dormitory.service.WorkService.WorkCommandService;
+import University.Dormitory.web.controller.AssistantController;
 import University.Dormitory.web.controller.ScheduleController;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,9 +18,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @SpringBootTest
 @Slf4j
@@ -37,6 +40,8 @@ public class WorkTest {
     ScheduleController scheduleController;
     @Autowired
     DormitoryCommandService dormitoryCommandService;
+    @Autowired
+    AssistantController assistantController;
 
 
     String schedulestartTime1 = "2023-04-18 10:30";
@@ -152,4 +157,25 @@ public class WorkTest {
         String s = workCommandService.deleteSchedule(Dormitory.DORMITORY2, LocalDate.of(2024, 4, 20));
         log.info("결과 : {}", s);
     }
+
+    @Test
+    @DisplayName("스케줄 조회 - 조교 근무(스케즐 관리)")
+    void seeWork() {
+        Map<Integer, List<String>> integerListMap = scheduleController.scheduleWorkTime("2", 2024, 4);
+        for (Map.Entry<Integer, List<String>> integerListEntry : integerListMap.entrySet()) {
+            log.info("키값: {}", integerListEntry.getKey());
+            log.info("이름: {}", integerListEntry.getValue());
+        }
+    }
+
+    @Test
+    @DisplayName("스케줄 조회 - 조교 근무(조교 페이지)")
+    void seeWork_assitant() {
+        Map<Integer, List<String>> integerListMap = scheduleController.scheduleWorkTime("2", 2024, 4);
+        for (Map.Entry<Integer, List<String>> integerListEntry : integerListMap.entrySet()) {
+            log.info("키값: {}", integerListEntry.getKey());
+            log.info("이름: {}", integerListEntry.getValue());
+        }
+    }
+
 }
