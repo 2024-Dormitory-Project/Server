@@ -137,6 +137,11 @@ public class AssistantController {
                     "같은 이름이 있어도 반환가능하고 스케줄 시작시간에 따라 정렬한 결과를 return함." +
                     "한마디로 그냥 날짜-이름 그대로 표시하면 된다는 뜻, 시간 정렬은 이미 함"
     )
+    @Parameters({
+            @Parameter(name = "type", description = "기숙사 조회인 경우 1,2,3 우편 근무인 경우 post", required = true),
+            @Parameter(name = "year", description = "연도 입력", required = true),
+            @Parameter(name = "month", description = "달 입력, 1~12의 값만 입력 가능", required = true)
+    })
     public Map<Integer, List<String>> scheduleWorkTime(@PathVariable("type") String type,
                                                        @RequestParam("year") int year, @RequestParam("month") int month) {
         if (type.equals("1") || type.equals("2") || type.equals("3")) { //기숙사 조회인 경우
