@@ -178,4 +178,13 @@ public class WorkTest {
         }
     }
 
+
+    @Test
+    @DisplayName("세부 근무자 조회")
+    void seedetailWork() {
+        Map<Integer, ConcurrentHashMap<String, List<LocalTime>>> integerConcurrentHashMapMap = assistantController.todayWorkersDetail(2, 4, 2024, 20);
+        for (Map.Entry<Integer, ConcurrentHashMap<String, List<LocalTime>>> integerConcurrentHashMapEntry : integerConcurrentHashMapMap.entrySet()) {
+            log.info("근무일:{}," + "시간: {}", integerConcurrentHashMapEntry.getKey(), integerConcurrentHashMapEntry.getValue());
+        }
+    }
 }
