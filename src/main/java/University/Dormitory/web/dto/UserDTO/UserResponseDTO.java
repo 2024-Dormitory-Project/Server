@@ -5,6 +5,8 @@ import University.Dormitory.domain.Enum.Dormitory;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDate;
+
 public class UserResponseDTO {
     @Builder
     @Getter
@@ -12,5 +14,7 @@ public class UserResponseDTO {
         long userId;
         Dormitory dormitory;
         Authority authority;
+        LocalDate joinDate;
+        String password;
     }
 }

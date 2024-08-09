@@ -10,6 +10,7 @@ import University.Dormitory.service.UserService.UserCommandService;
 import University.Dormitory.web.dto.SignInDTO.SignInRequestDTO;
 import University.Dormitory.web.dto.SignInDTO.SignInResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name="BASE-CONTROLLER", description = "")
 public class BaseController {
     private final UserCommandService userCommandService;
     private final RefreshTokenRepository refreshTokenRepository;
@@ -34,6 +36,9 @@ public class BaseController {
     private final UserRepository userRepository;
 
     @GetMapping("/")
+    @Operation(
+            summary = "도메인으로 연결할 시 로그인 페이지로 리다이렉트"
+    )
     public void redirect(HttpServletResponse response) throws IOException {
         String redirect_uri="https://www.gc-dormitory.shop/signin";
         response.sendRedirect(redirect_uri);
@@ -101,6 +106,10 @@ public class BaseController {
     }
 
     @GetMapping("/health")
+    @Operation(
+            summary = "CI/CD 구축",
+            description = "CI/CD 배포에서 서버 잘 돌아가는지 확인용 페이지"
+    )
     public String healthCheck() {
         return "I'm healthy!";
     }

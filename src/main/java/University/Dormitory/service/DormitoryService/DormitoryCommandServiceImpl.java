@@ -2,8 +2,6 @@ package University.Dormitory.service.DormitoryService;
 
 import University.Dormitory.domain.Enum.Dormitory;
 import University.Dormitory.repository.CustomRepository;
-import University.Dormitory.repository.JPARepository.PostUserRepository;
-import University.Dormitory.repository.JPARepository.WorkDateRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,8 +18,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 public class DormitoryCommandServiceImpl implements DormitoryCommandService {
-    private final WorkDateRepository workDateRepository;
-    private final PostUserRepository postUserRepository;
     private final CustomRepository customRepository;
 
     @Override

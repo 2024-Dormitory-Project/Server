@@ -16,6 +16,10 @@ import University.Dormitory.web.dto.MainPageDTO.MainResponseDTO;
 import University.Dormitory.web.dto.WorkDTO.WorkRequestDTO;
 import University.Dormitory.web.dto.WorkDTO.WorkResposneDTO;
 import University.Dormitory.web.dto.WorkDateDTO.WorkDateResponseDTO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,11 +31,13 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @RestController
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/assistant")
+@Tag(name="ASSISTANT-CONTROLLER", description = "[조교용 API] 조교, 스케줄 관리 조교, 사감 접속 가능")
 public class AssistantController {
     private final WorkCommandService workCommandService;
     private final JwtTokenProvider jwtTokenProvider;
@@ -41,6 +47,13 @@ public class AssistantController {
 
 
     @PatchMapping("/givework/{type}")
+    @Operation(
+            summary = "근무 맞교대 API",
+            description = "로그인 사용자가 자신의 근무를 주는 API. 받는 사람의 이름과 줄 자신의 근무를 입력. 만약 우편 근무라면 year,month,day까지만 입력"
+    )
+    @Parameters({
+            @Parameter(name = "type", description = "dormitory OR post 입력", required = true),
+    })
     WorkResposneDTO.workResult giveWork(HttpServletRequest request,
                                         @PathVariable("type") String type, @RequestBody WorkRequestDTO.giveWorkDto time) {
         String token = request.getHeader("Authorization");
@@ -76,6 +89,13 @@ public class AssistantController {
     }
 
     @PatchMapping("/exchangework/{type}")
+    @Operation(
+            summary = "근무 교체 API",
+            description = "로그인한 유저와 수락자의 시간을 교환하는 API. 수락자는 이름까지 줘야합니다. 우편근무라면 이름, year,month,day까지만 입력"
+    )
+    @Parameters({
+            @Parameter(name = "type", description = "dormitory OR post 입력", required = true),
+    })
     WorkResposneDTO.workResult exchangeWork(HttpServletRequest request, @PathVariable("type") String type, @RequestBody WorkRequestDTO.exchangeWorkDto exchange) {
         String token = request.getHeader("Authorization");
         long userId1 = Long.parseLong(jwtTokenProvider.getUserIdFromAcessToken(token));
@@ -110,25 +130,80 @@ public class AssistantController {
         }
     }
 
-    @GetMapping("/schedule")
-    HashMap<Integer, List<String>> todayWorkersName(HttpServletRequest request,
-                                                    @RequestParam("dormitoryNum") int dormitoryNum,
-                                                    @RequestParam("month") int month,
-                                                    @RequestParam("year") int year) {
-        Dormitory dormitory = DormitoryConverter.toDormitory(dormitoryNum);
-        HashMap<Integer, List<String>> result = new HashMap<>();
-        for (int i = 1; i <= LocalDate.of(year, month, 1).lengthOfMonth(); i++) {
-            LocalDate date = LocalDate.of(year, month, i);
-            MultiValueMap<String, CustomRepository.WorkTime> stringListMap = dormitoryCommandService.viewDormitoryWorkers(date, dormitory);
-            List<String> names = new ArrayList<>(stringListMap.keySet());
-            names.addAll(stringListMap.keySet());
-            result.put(i, names);
+    @GetMapping("/schedule/{type}")
+    @Operation(
+            summary = "달력 스케줄 조회",
+            description = "/schedule/scheduleworktime/{type}과 똑같이 작동함" +
+                    "같은 이름이 있어도 반환가능하고 스케줄 시작시간에 따라 정렬한 결과를 return함." +
+                    "한마디로 그냥 날짜-이름 그대로 표시하면 된다는 뜻, 시간 정렬은 이미 함"
+    )
+    @Parameters({
+            @Parameter(name = "type", description = "기숙사 조회인 경우 1,2,3 우편 근무인 경우 post", required = true),
+            @Parameter(name = "year", description = "연도 입력", required = true),
+            @Parameter(name = "month", description = "달 입력, 1~12의 값만 입력 가능", required = true)
+    })
+    public Map<Integer, List<String>> scheduleWorkTime(@PathVariable("type") String type,
+                                                       @RequestParam("year") int year, @RequestParam("month") int month) {
+        if (type.equals("1") || type.equals("2") || type.equals("3")) { //기숙사 조회인 경우
+            int dormitoryNum = Integer.parseInt(type);
+            Dormitory dormitory = DormitoryConverter.toDormitory(dormitoryNum);
+            Map<Integer, List<String>> result = new ConcurrentHashMap<>();
+            for (int i = 1; i <= LocalDate.of(year, month, 1).lengthOfMonth(); i++) {
+                LocalDate date = LocalDate.of(year, month, i);
+                MultiValueMap<String, CustomRepository.WorkTime> stringListMap = dormitoryCommandService.viewDormitoryWorkers(date, dormitory);
+                if (stringListMap.isEmpty()) {
+                    result.put(i, new ArrayList<>());
+                } else {
+                    List<String> names = stringListMap.entrySet().stream()
+                            .flatMap(entry -> entry.getValue().stream()
+                                    .map(workTime -> new AbstractMap.SimpleEntry<>(entry.getKey(), workTime)))
+                            .sorted((e2, e1) -> e2.getValue().getStartTime().compareTo(e1.getValue().getStartTime()))
+                            .map(e -> e.getKey())
+                            .collect(Collectors.toList());
+
+                    result.put(i, names);
+                }
+            }
+            return result;
+        } else if (type.equals("post")) { //우편근무 조회인 경우
+            LocalDate date = LocalDate.of(year, month, 1);
+            return dormitoryCommandService.viewPostWorker(date);
+        } else { //type에 이상한 값이 들어간 경우
+            throw new WrongPathRequestException("인 경로는 존재하지 않습니다", type);
         }
-        return result;
+    }
+
+    @GetMapping("/main/calendar")
+    @Operation(
+            summary = "나의 근무일 보기",
+            description = "로그인한 사용자의 근무 있는 날짜 전부 던져줍니다."
+    )
+    @Parameters({
+            @Parameter(name = "year", description = "연", required = true),
+            @Parameter(name = "month", description = "월", required = true),
+    })
+    WorkDateResponseDTO.calendarDto calendar(HttpServletRequest request,
+                                             @RequestParam("year") int year, @RequestParam("month") int month) {
+        String token = request.getHeader("Authorization");
+        long userId = Long.parseLong(jwtTokenProvider.getUserIdFromAcessToken(token));
+        List<LocalDate> localDates = dateCommandService.myWorkdays(year, month, userId);
+        return WorkDateResponseDTO.calendarDto.builder()
+                .workdates(localDates)
+                .build();
     }
 
     @GetMapping("/schedule/people")
-    Map<Integer, ConcurrentHashMap<String, List<LocalTime>>> todayWorkersDetail(
+    @Operation(
+            summary = "상세 근무자 조회 API",
+            description = "스케줄 근무자의 상세 스케줄. 이름 + 시간까지 나옵니다."
+    )
+    @Parameters({
+            @Parameter(name = "dormitoryNum", description = "1,2,3 중 숫자로 주세요", required = true),
+            @Parameter(name = "year", description = "년", required = true),
+            @Parameter(name = "month", description = "월", required = true),
+            @Parameter(name = "day", description = "일", required = true),
+    })
+    public Map<Integer, ConcurrentHashMap<String, List<LocalTime>>> todayWorkersDetail(
             @RequestParam("dormitoryNum") int dormitoryNum,
             @RequestParam("month") int month,
             @RequestParam("year") int year,
@@ -159,18 +234,15 @@ public class AssistantController {
         return result;
     }
 
-    @GetMapping("/main/calendar")
-    WorkDateResponseDTO.calendarDto calendar(HttpServletRequest request,
-                                             @RequestParam("year") int year, @RequestParam("month") int month) {
-        String token = request.getHeader("Authorization");
-        long userId = Long.parseLong(jwtTokenProvider.getUserIdFromAcessToken(token));
-        List<LocalDate> localDates = dateCommandService.myWorkdays(year, month, userId);
-        return WorkDateResponseDTO.calendarDto.builder()
-                .workdates(localDates)
-                .build();
-    }
-
     @GetMapping("/main/changehistory")
+    @Operation(
+            summary = "근무 변경 이력",
+            description = "로그인한 사용자가 요청했거나, 수락했던 모든 변경 이력을 줍니다"
+    )
+    @Parameters({
+            @Parameter(name = "year", description = "연", required = true),
+            @Parameter(name = "month", description = "월", required = true),
+    })
     List<WorkDateResponseDTO.changeHistory> changeHistory(HttpServletRequest request, @RequestParam("year") int year, @RequestParam("month") int month) {
         String token = request.getHeader("Authorization");
         long userId = Long.parseLong(jwtTokenProvider.getUserIdFromAcessToken(token));
@@ -192,6 +264,14 @@ public class AssistantController {
     }
 
     @GetMapping("/main/time")
+    @Operation(
+            summary = "나의 근무시간 및 근무일 개수 조회",
+            description = "몇시간 근무했는지 혹은 몇일 근무했는지 확인이 가능합니다."
+    )
+    @Parameters({
+            @Parameter(name = "year", description = "연", required = true),
+            @Parameter(name = "month", description = "월", required = true),
+    })
     MainResponseDTO.TimeDto time(HttpServletRequest request,
                                  @RequestParam("year") int year, @RequestParam("month") int month) {
         String token = request.getHeader("Authorization");
@@ -204,6 +284,10 @@ public class AssistantController {
     }
 
     @PostMapping("/main/work")
+    @Operation(
+            summary = "출근시간 저장 API",
+            description = "출근 저장 API, 스케줄상 시간과 출근한 시간을 같이 주시면 됩니다."
+    )
     MainResponseDTO.Work work(HttpServletRequest request, @RequestBody MainRequestDTO.work workday) {
         String token = request.getHeader("Authorization");
         long userId = Long.parseLong(jwtTokenProvider.getUserIdFromAcessToken(token));
@@ -228,12 +312,14 @@ public class AssistantController {
                 .build();
     }
 
-    /*테스트 아직 안됨*/
     @PostMapping("/main/work/late")
+    @Operation(
+            summary = "늦었을 떄 사유 작성 API",
+            description = "지각 시 사유를 작성하는 API입니다.")
     MainResponseDTO.Work lateReason(HttpServletRequest request,
-                                    @RequestBody Map<String, String> data) {
-        String reason = data.get("reason");
-        String time = data.get("time");
+                                    @RequestBody WorkRequestDTO.reason data) {
+        String reason = data.getReason();
+        String time = data.getTime();
         log.info("사유 : {}, 시간 : {}", reason, time);
         long userId = Long.parseLong(jwtTokenProvider.getUserIdFromAcessToken(request.getHeader("Authorization")));
         String s = workCommandService.writeReasonByUserId(userId, reason, time);
