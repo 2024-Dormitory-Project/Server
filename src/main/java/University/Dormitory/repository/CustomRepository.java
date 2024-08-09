@@ -249,6 +249,7 @@ public class CustomRepository {
                 .where(
                         workDate.scheduledStartTime.year().eq(date.getYear())
                                 .and(workDate.scheduledStartTime.month().eq(date.getMonthValue()))
+                                .and(workDate.scheduledStartTime.dayOfMonth().eq(date.getDayOfMonth()))
                                 .and(workDate.user.dormitory.eq(dormitory))
                 )
                 .execute();
@@ -274,6 +275,7 @@ public class CustomRepository {
 
     public Map<Integer, List<String>> postworkes(LocalDate date) {
         List<Tuple> fetch = query.select(postUser.user.name, postUser.postWorkDate.dayOfMonth())
+                .from(postUser)
                 .where(postUser.postWorkDate.year().eq(date.getYear())
                         .and(postUser.postWorkDate.month().eq(date.getMonthValue())))
                 .fetch();
@@ -281,7 +283,7 @@ public class CustomRepository {
         for (Tuple tuple : fetch) {
             Integer day = tuple.get(postUser.postWorkDate.dayOfMonth());
             String name = tuple.get(postUser.user.name);
-
+            log.info("day : {}, name : {}" , day, name);
             // 날짜가 존재하지 않으면 새로운 리스트를 생성하고 추가
             workerList.computeIfAbsent(day, k -> new ArrayList<>()).add(name);
         }

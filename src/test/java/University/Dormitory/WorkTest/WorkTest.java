@@ -1,13 +1,13 @@
 package University.Dormitory.WorkTest;
 
 import University.Dormitory.domain.Enum.Dormitory;
-import University.Dormitory.domain.User;
 import University.Dormitory.repository.CustomRepository;
 import University.Dormitory.repository.JPARepository.UserRepository;
+import University.Dormitory.service.DormitoryService.DormitoryCommandService;
 import University.Dormitory.service.UserService.UserCommandService;
 import University.Dormitory.service.WorkService.WorkCommandService;
-import University.Dormitory.web.controller.BaseController;
-import University.Dormitory.web.dto.SignUpDTO.SignUpRequestDTO;
+import University.Dormitory.web.controller.AssistantController;
+import University.Dormitory.web.controller.ScheduleController;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,13 +15,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.MultiValueMap;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @SpringBootTest
 @Slf4j
@@ -35,6 +36,13 @@ public class WorkTest {
     WorkCommandService workCommandService;
     @Autowired
     CustomRepository customRepository;
+    @Autowired
+    ScheduleController scheduleController;
+    @Autowired
+    DormitoryCommandService dormitoryCommandService;
+    @Autowired
+    AssistantController assistantController;
+
 
     String schedulestartTime1 = "2023-04-18 10:30";
     String schedulestartTime2 = "2023-04-18 18:30";
@@ -46,9 +54,9 @@ public class WorkTest {
 
     @BeforeEach
     void beforeEach() {
-        User user1 = userCommandService.SignUp(SignUpRequestDTO.SignUpDto.builder().userId(202035505).name("권하림").authority("사감").dormitory(Dormitory.DORMITORY2).build());
-        User user2 = userCommandService.SignUp(SignUpRequestDTO.SignUpDto.builder().userId(202035506).name("조혜원").authority("사감").dormitory(Dormitory.DORMITORY2).build());
-        User user3 = userCommandService.SignUp(SignUpRequestDTO.SignUpDto.builder().userId(202035507).name("강지원").authority("조교").dormitory(Dormitory.DORMITORY2).build());
+//        User user1 = userCommandService.SignUp(SignUpRequestDTO.SignUpDto.builder().userId(202035505).name("권하림").authority("사감").dormitory(Dormitory.DORMITORY2).build());
+//        User user2 = userCommandService.SignUp(SignUpRequestDTO.SignUpDto.builder().userId(202035506).name("조혜원").authority("사감").dormitory(Dormitory.DORMITORY2).build());
+//        User user3 = userCommandService.SignUp(SignUpRequestDTO.SignUpDto.builder().userId(202035507).name("강지원").authority("조교").dormitory(Dormitory.DORMITORY2).build());
         log.info("테스트 코드 - 유저 2명 저장 완료");
     }
 
@@ -90,7 +98,7 @@ public class WorkTest {
         LocalDateTime endTime2 = LocalDateTime.parse(wantLeaveTime1, formatter);
         workCommandService.changeOrSaveScheduleTimeByUserId(202035505, null, startTime1, endTime2);
 
-        workCommandService.delteSchedule(Dormitory.DORMITORY2, LocalDate.from(startTime1));
+        workCommandService.deleteSchedule(Dormitory.DORMITORY2, LocalDate.from(startTime1));
         LocalDate deleteTime = LocalDate.of(startTime1.getYear(), startTime1.getMonth(), startTime1.getDayOfMonth());
         customRepository.findDormitoryWorkersNameByDateAndDormitory(deleteTime, Dormitory.DORMITORY2);
         //아무것도 안떠야 정상
@@ -125,5 +133,58 @@ public class WorkTest {
         customRepository.findDormitoryWorkersNameByDateAndDormitory(date, Dormitory.DORMITORY2);
     }
 
+    @Test
+    @DisplayName("우편 근무 버그")
+    void postworkUser() {
+        Map<Integer, List<String>> post = scheduleController.scheduleWorkTime("post", 2023, 4);
+        for (Map.Entry<Integer, List<String>> integerListEntry : post.entrySet()) {
+            log.info("키값:{}", integerListEntry.getKey());
+            log.info("이름: {}", integerListEntry.getValue());
+        }
+    }
 
+    @Test
+    @DisplayName("스케줄 삭제 - 우편 근무")
+    void deletePostWork() {
+        String s = workCommandService.deletePostWork(LocalDate.of(2023, 4, 18));
+        log.info("결과 : {}", s);
+    }
+
+
+    @Test
+    @DisplayName("스케줄 삭제 - 조교 근무")
+    void deleteWork() {
+        String s = workCommandService.deleteSchedule(Dormitory.DORMITORY2, LocalDate.of(2024, 4, 20));
+        log.info("결과 : {}", s);
+    }
+
+    @Test
+    @DisplayName("스케줄 조회 - 조교 근무(스케즐 관리)")
+    void seeWork() {
+        Map<Integer, List<String>> integerListMap = scheduleController.scheduleWorkTime("2", 2024, 4);
+        for (Map.Entry<Integer, List<String>> integerListEntry : integerListMap.entrySet()) {
+            log.info("키값: {}", integerListEntry.getKey());
+            log.info("이름: {}", integerListEntry.getValue());
+        }
+    }
+
+    @Test
+    @DisplayName("스케줄 조회 - 조교 근무(조교 페이지)")
+    void seeWork_assitant() {
+        Map<Integer, List<String>> integerListMap = scheduleController.scheduleWorkTime("2", 2024, 4);
+        for (Map.Entry<Integer, List<String>> integerListEntry : integerListMap.entrySet()) {
+            log.info("키값: {}", integerListEntry.getKey());
+            log.info("이름: {}", integerListEntry.getValue());
+        }
+    }
+
+
+    @Test
+    @DisplayName("세부 근무자 조회")
+    void seedetailWork() {
+        Map<Integer, ConcurrentHashMap<String, List<LocalTime>>> integerConcurrentHashMapMap = assistantController.todayWorkersDetail(2, 4, 2024, 20);
+        for (Map.Entry<Integer, ConcurrentHashMap<String, List<LocalTime>>> integerConcurrentHashMapEntry : integerConcurrentHashMapMap.entrySet()) {
+            log.info("근무일:{}," + "시간: {}", integerConcurrentHashMapEntry.getKey(), integerConcurrentHashMapEntry.getValue());
+        }
+    }
 }
