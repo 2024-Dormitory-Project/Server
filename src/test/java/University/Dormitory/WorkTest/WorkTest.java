@@ -187,4 +187,13 @@ public class WorkTest {
             log.info("근무일:{}," + "시간: {}", integerConcurrentHashMapEntry.getKey(), integerConcurrentHashMapEntry.getValue());
         }
     }
+
+    @Test
+    @DisplayName("N기숙사의 모든 근무자 조회")
+    void seeAllWorkersInDormitory() {
+        List<String> allNamesInNDormitory = assistantController.findAllNamesInNDormitory(2);
+        for (String s : allNamesInNDormitory) {
+            log.info(s);
+        }
+    }
 }

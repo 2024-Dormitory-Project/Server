@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/assistant")
-@Tag(name="ASSISTANT-CONTROLLER", description = "[조교용 API] 조교, 스케줄 관리 조교, 사감 접속 가능")
+@Tag(name = "ASSISTANT-CONTROLLER", description = "[조교용 API] 조교, 스케줄 관리 조교, 사감 접속 가능")
 public class AssistantController {
     private final WorkCommandService workCommandService;
     private final JwtTokenProvider jwtTokenProvider;
@@ -327,5 +327,17 @@ public class AssistantController {
                 .isSuccess(true)
                 .message(s)
                 .build();
+    }
+
+    @PostMapping("/names")
+    @Operation(
+            summary = "N번째 기숙사의 모든 이름을 불러오는 API",
+            description = "해당 기숙사의 모든 이름이 필요할 때 사용하면 됩니다")
+    @Parameters({
+            @Parameter(name = "DormitoryNum", description = "1,2,3으로 주세요", required = true)
+    })
+    public List<String> findAllNamesInNDormitory(@RequestParam("DormitoryNum") int num) {
+        Dormitory dormitory = DormitoryConverter.toDormitory(num);
+        return userCommandService.allNamesInNDormitory(dormitory);
     }
 }

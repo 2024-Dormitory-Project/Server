@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -130,4 +131,11 @@ public class UserCommandServiceImpl implements UserCommandService {
         log.info("{}의 refresh토큰을 삭제합니다.", userId);
         refreshTokenRepository.deleteById(userId);
     }
+
+    @Override
+    public List<String> allNamesInNDormitory(Dormitory dormitory) {
+        return userRepository.findNamesByDormitory(dormitory);
+    }
+
+
 }
