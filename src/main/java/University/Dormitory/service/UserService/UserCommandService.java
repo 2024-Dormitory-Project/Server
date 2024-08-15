@@ -1,9 +1,11 @@
 package University.Dormitory.service.UserService;
 
 import University.Dormitory.domain.Enum.Authority;
+import University.Dormitory.domain.Enum.Dormitory;
 import University.Dormitory.domain.User;
 import University.Dormitory.web.dto.SignUpDTO.SignUpRequestDTO;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -32,4 +34,7 @@ public interface UserCommandService {
 
 //    refreshToken 삭제
     void deleteRefreshTokenByUserId(long userId);
+
+    //    N번째 기숙사의 모든 사용자의 이름 불러오기
+    List<String> allNamesInNDormitory(Dormitory dormitory);
 }
