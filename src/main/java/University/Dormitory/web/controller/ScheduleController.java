@@ -89,13 +89,11 @@ public class ScheduleController {
     @PostMapping("/scheduleworktime/{type}")
     @Operation(
             summary = "스케줄 저장 및 수정",
-            description = "스케줄 저장 혹은 수정, 리스트 값 3개 넘길 시 수정, 2개일 시 저장. 수정일 때는 스케줄 시작시간을 넘기고 그 뒤에 변경할 스케줄 시작시간과 퇴근시간을 보내면 되고\" +\n" +
-                    "저장인 경우에는 출근시간, 퇴근시간만 각각 보내면 됨"
+            description = "스케줄 저장/수정 API, 리스트 값 3개 넘길 시에는 수정, 2개일 시에는 저장. 수정일 때는 스케줄 시작시간을 넘기고 그 뒤에 변경할 스케줄 시작시간과 퇴근시간을 보내면 되고" +
+                    "저장인 경우에는 출근시간, 퇴근시간만 (2개) 보내면 됨"
     )
     @Parameters({
-            @Parameter(name = "type", description = "기숙사 조회인 경우 1,2,3 우편 근무인 경우 post", required = true),
-            @Parameter(name = "year", description = "연도 입력", required = true),
-            @Parameter(name = "month", description = "달 입력, 1~12의 값만 입력 가능", required = true)
+            @Parameter(name = "type", description = "기숙사 조회인 경우 1,2,3 우편 근무인 경우 post", required = true)
     })
     public MainResponseDTO.Work saveNewSchedule(@PathVariable("type") String type, @RequestBody List<WorkRequestDTO.worker> saveWork) {
         if (type.equals("1") || type.equals("2") || type.equals("3")) { //기숙사 조회인 경우
