@@ -89,7 +89,7 @@ jobs:
 
   clean:
     runs-on: ubuntu-latest
-    if: ${{ github.event.schedule }}
+    if: github.event.schedule
     steps:
       - name: Retrieve optimize script
         run: echo "${{ secrets.OPTIMIZE_SCRIPT }}" > optimize.sh
