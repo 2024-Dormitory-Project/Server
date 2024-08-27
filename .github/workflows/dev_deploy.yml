@@ -3,6 +3,8 @@ name: GC-Dormitory
 on:
   pull_request:
     types: [closed]
+  schedule:
+    - cron: '0 0 * * *'
   workflow_dispatch:
 
 jobs:
@@ -24,6 +26,10 @@ jobs:
         run: chmod +x ./gradlew
         shell: bash
 
+      - name: Create log directory
+        run: |
+          mkdir -p /var/log/spring-log
+
       - name: Create application.properties
         run: |
           mkdir -p src/main/resources
@@ -36,7 +42,12 @@ jobs:
           echo "spring.jpa.properties.hibernate.format_sql=true" >> src/main/resources.application.properties
           echo "spring.jpa.properties.hibernate.use_sql_comments=true" >> src/main/resources/application.properties
           echo "spring.jpa.hibernate.ddl-auto=update" >> src/main/resources/application.properties
-          echo "logging.level.root=TRACE" >> src/main/resources/application.properties
+          echo "logging.level.root=WARN" >> src/main/resources/application.properties
+          echo "logging.file.name=var/log/spring-log/application.log" >> src/main/resources/application.properties
+          echo "logging.logback.rollingpolicy.max-history=15" >> src/main/resources/application.properties
+          echo "logging.logback.rollingpolicy.file-name-pattern=var/log/spring-log/%d{yyyy-MM-dd}.log" >> src/main/resources/application.properties
+          echo "logging.pattern.dateformat=yyyy-MM-dd HH:mm:ss.SSS,Asia/Seoul" >> src/main/resources/application.properties
+          echo "logging.logback.rollingpolicy.max-file-size=100MB" >> src/main/resources/application.properties
         shell: bash
 
       - name: Build with Gradle
@@ -75,3 +86,19 @@ jobs:
           region: ap-northeast-2
           deployment_package: deploy/deploy.zip
           wait_for_deployment: false
+
+  clean:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.schedule }}
+    steps:
+      - name: Retrieve optimize script
+        run: echo "${{ secrets.OPTIMIZE_SCRIPT }}" > optimize.sh
+        shell: bash
+
+      - name: Grant execute permission for optimize script
+        run: chmod +x optimize.sh
+        shell: bash
+
+      - name: Run optimize script
+        run: ./optimize.sh
+        shell: bash
