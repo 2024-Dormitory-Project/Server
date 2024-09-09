@@ -3,8 +3,6 @@ name: GC-Dormitory
 on:
   pull_request:
     types: [closed]
-  schedule:
-    - cron: '0 0 * * *'
   workflow_dispatch:
 
 jobs:
@@ -86,19 +84,3 @@ jobs:
           region: ap-northeast-2
           deployment_package: deploy/deploy.zip
           wait_for_deployment: false
-
-  clean:
-    runs-on: ubuntu-latest
-    if: github.event.schedule
-    steps:
-      - name: Retrieve optimize script
-        run: echo "${{ secrets.OPTIMIZE_SCRIPT }}" > optimize.sh
-        shell: bash
-
-      - name: Grant execute permission for optimize script
-        run: chmod +x optimize.sh
-        shell: bash
-
-      - name: Run optimize script
-        run: ./optimize.sh
-        shell: bash
